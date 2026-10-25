@@ -33,7 +33,7 @@ US CPAs default to QuickBooks Online because **QuickBooks Online Accountant (QBO
 
 ## 4. `1099` Contractors vs. W-2 Payroll
 
-- **Native `1099-NEC` / `1099-MISC` + IRS IRIS:** Digital W-9 capture, automatic exclusion of credit-card/processor (`1099-K`) rails so only ACH/check/wire/cash count toward `1099-NEC`/`1099-MISC` (`$600` TY2025; **`$2,000` TY2026+ under OBBBA**), and free bulk CSV template compatibility with the **IRS IRIS Portal** (mandated at `>= 10` combined information returns).
+- **Native `1099-NEC` / `1099-MISC` + IRS IRIS:** Digital W-9 capture, automatic exclusion of credit-card/processor (`1099-K`) rails so only ACH/check/wire/cash count toward `1099-NEC`/`1099-MISC` (`$600` TY2025; **`$2,000` TY2026+ under OBBBA `IRC §§ 6041/6041A`**, with retained `$10` Box 2 royalties and `$600` Box 10 attorney gross proceeds exceptions), and free bulk CSV template compatibility with the **IRS IRIS Portal** (mandated at `>= 10` combined information returns).
 - **W-2 Payroll Boundary:** QBO Payroll (`$50–$134/mo + $6.50–$17/emp`) pollutes the GL with per-employee paychecks and exposes individual salaries. CPAs prefer **external Gusto Summary Journal Sync**: one balanced summary entry per pay run (`Officer Wages`, `Staff Wages`, `Employer Payroll Taxes`, `Benefits` -> `Payroll/Tax Clearing` matching bank ACH debits 1-to-1).
 
 ## 5. Pricing, Asymmetric `CorePlus` API Metering & MCP

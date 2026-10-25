@@ -38,7 +38,7 @@
 
 ## 4. Contractors (`1099`) & Gusto Payroll Sync
 
-- **Native `1099` Tracking:** Digital W-9 capture, expense-account-to-box mapping (`1099-NEC` `$2,000` federal threshold from 2026 under OBBBA; `1099-MISC` for rents/other), automatic `1099-K` exclusion for card/processor rails (`stripe`/`paypal`/card) vs. `ach`/`check`/`wire`, and partner e-file handoff (`~$2–$5`/form via Avalara/Tax1099/Track1099).
+- **Native `1099` Tracking:** Digital W-9 capture, expense-account-to-box mapping (`$2,000` federal threshold from `TY2026` under OBBBA `IRC §§ 6041/6041A` for `1099-NEC` Box 1 and general `1099-MISC` rents/other, alongside retained `$10` Box 2 royalties / `$600` Box 10 attorney gross proceeds exceptions), automatic `1099-K` exclusion for card/processor rails (`stripe`/`paypal`/card) vs. `ach`/`check`/`wire`, and partner e-file handoff (`~$2–$5`/form via Avalara/Tax1099/Track1099).
 - **W-2 Payroll via Gusto:** Xero delegates US W-2 payroll to Gusto (`$36/mo + $6/person` add-on, or standalone Gusto `$49–$80/mo + $6–$12/person`). Gusto posts a balanced journal (`Gross Wages`, `Employer Taxes`, `Benefits` -> `Payroll Clearing`, `Payroll Tax Clearing`), reconciled against 3–4 separate bank ACH pulls.
 
 ## 5. Pricing & The Fatal Agentic API Gap

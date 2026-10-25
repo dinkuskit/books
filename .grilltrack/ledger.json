@@ -71,13 +71,21 @@
       "rationale": "Expands adoption to every EmDash site (not just storefronts), turns open county sales-tax schedules into a standalone OSS builder/agent resource, and prevents data lock-in.",
       "repair_required": false,
       "review_classifications": [],
-      "review_history": [],
-      "review_ref": null,
-      "review_result": null,
-      "review_source_identity": null,
+      "review_history": [
+        {
+          "classifications": [],
+          "ref": "proof/grill-charter-20261025/REVIEW_1.md",
+          "result": "clean",
+          "reviewed_at": "2026-10-25T23:14:34+00:00",
+          "source_identity": "git:e7377ee8805d02f9182b8b5681f28fc7777138ba"
+        }
+      ],
+      "review_ref": "proof/grill-charter-20261025/REVIEW_1.md",
+      "review_result": "clean",
+      "review_source_identity": "git:e7377ee8805d02f9182b8b5681f28fc7777138ba",
       "status": "verified",
       "superseded_by": null,
-      "updated_at": "2026-10-25T15:08:37+00:00",
+      "updated_at": "2026-10-25T23:14:34+00:00",
       "verification_ref": "proof/grill-charter-20261025/PROOF.md"
     },
     {
@@ -140,13 +148,21 @@
       "rationale": "Replaces Xero reconciliation across checking, credit cards, standard gateways, and high-risk gateways without enterprise Plaid proxy minimums or Stripe-only lock-in.",
       "repair_required": false,
       "review_classifications": [],
-      "review_history": [],
-      "review_ref": null,
-      "review_result": null,
-      "review_source_identity": null,
+      "review_history": [
+        {
+          "classifications": [],
+          "ref": "proof/grill-charter-20261025/REVIEW_1.md",
+          "result": "clean",
+          "reviewed_at": "2026-10-25T23:14:34+00:00",
+          "source_identity": "git:e7377ee8805d02f9182b8b5681f28fc7777138ba"
+        }
+      ],
+      "review_ref": "proof/grill-charter-20261025/REVIEW_1.md",
+      "review_result": "clean",
+      "review_source_identity": "git:e7377ee8805d02f9182b8b5681f28fc7777138ba",
       "status": "verified",
       "superseded_by": null,
-      "updated_at": "2026-10-25T15:08:37+00:00",
+      "updated_at": "2026-10-25T23:14:34+00:00",
       "verification_ref": "proof/grill-charter-20261025/PROOF.md"
     },
     {
@@ -209,13 +225,21 @@
       "rationale": "Delivers Xero-equivalent Cash/Accrual P&L and CPA tie-outs cleanly without premature cross-plugin inventory complexity.",
       "repair_required": false,
       "review_classifications": [],
-      "review_history": [],
-      "review_ref": null,
-      "review_result": null,
-      "review_source_identity": null,
+      "review_history": [
+        {
+          "classifications": [],
+          "ref": "proof/grill-charter-20261025/REVIEW_1.md",
+          "result": "clean",
+          "reviewed_at": "2026-10-25T23:14:34+00:00",
+          "source_identity": "git:e7377ee8805d02f9182b8b5681f28fc7777138ba"
+        }
+      ],
+      "review_ref": "proof/grill-charter-20261025/REVIEW_1.md",
+      "review_result": "clean",
+      "review_source_identity": "git:e7377ee8805d02f9182b8b5681f28fc7777138ba",
       "status": "verified",
       "superseded_by": null,
-      "updated_at": "2026-10-25T15:08:37+00:00",
+      "updated_at": "2026-10-25T23:14:34+00:00",
       "verification_ref": "proof/grill-charter-20261025/PROOF.md"
     },
     {
@@ -270,6 +294,50 @@
           "review_source_identity": null,
           "to": "verified",
           "verification_ref": null
+        },
+        {
+          "at": "2026-10-25T23:14:34+00:00",
+          "choice": "Leave checkout tax rate calculation outside Books; own post-checkout tax readiness across three pieces: (1) Three-Bucket 'Safe to Spend' cash header (Sales Tax Owed | Income Tax Set-Aside | Safe to Spend), (2) Processor-independent US County & Local District resolution (via free official SST boundary/rate CSVs, US Census batch geocoder, and state DOR GIS packs\u2014working identically for Stripe, Authorize.Net, and CSV imports) producing CPA-ready monthly .xlsx/.csv County Sales Tax Workbooks, and (3) Rolling quarterly Federal + State income-tax set-aside pacer (Apr 15 / Jun 15 / Sep 15 / Jan 15). Default output is CPA-first handoff (with optional self-filing from the same verified workbook); defer 50-state nexus threshold alarms and resale-certificate vaults beyond V1.",
+          "from": "verified",
+          "implementation_ref": "docs/CHARTER.md",
+          "note": "adjudicated review requires a fix",
+          "repair_required": false,
+          "review_classifications": [],
+          "review_ref": null,
+          "review_result": null,
+          "review_source_identity": null,
+          "to": "needs_reverification",
+          "verification_ref": "proof/grill-charter-20261025/PROOF.md"
+        },
+        {
+          "at": "2026-10-25T23:14:34+00:00",
+          "choice": "Leave checkout tax rate calculation outside Books; own post-checkout tax readiness across three pieces: (1) Three-Bucket 'Safe to Spend' cash header (Sales Tax Owed | Income Tax Set-Aside | Safe to Spend), (2) Processor-independent US County & Local District resolution (via free official SST boundary/rate CSVs, US Census batch geocoder, and state DOR GIS packs\u2014working identically for Stripe, Authorize.Net, and CSV imports) producing CPA-ready monthly .xlsx/.csv County Sales Tax Workbooks, and (3) Rolling quarterly Federal + State income-tax set-aside pacer (Apr 15 / Jun 15 / Sep 15 / Jan 15). Default output is CPA-first handoff (with optional self-filing from the same verified workbook); defer 50-state nexus threshold alarms and resale-certificate vaults beyond V1.",
+          "from": "needs_reverification",
+          "implementation_ref": "docs/CHARTER.md",
+          "note": "bounded implementation recorded",
+          "repair_required": true,
+          "review_classifications": [
+            "required_fix"
+          ],
+          "review_ref": "proof/grill-charter-20261025/REVIEW_1.md",
+          "review_result": "findings",
+          "review_source_identity": "git:e7377ee8805d02f9182b8b5681f28fc7777138ba",
+          "to": "implemented",
+          "verification_ref": "proof/grill-charter-20261025/PROOF.md"
+        },
+        {
+          "at": "2026-10-25T23:14:34+00:00",
+          "choice": "Leave checkout tax rate calculation outside Books; own post-checkout tax readiness across three pieces: (1) Three-Bucket 'Safe to Spend' cash header (Sales Tax Owed | Income Tax Set-Aside | Safe to Spend), (2) Processor-independent US County & Local District resolution (via free official SST boundary/rate CSVs, US Census batch geocoder, and state DOR GIS packs\u2014working identically for Stripe, Authorize.Net, and CSV imports) producing CPA-ready monthly .xlsx/.csv County Sales Tax Workbooks, and (3) Rolling quarterly Federal + State income-tax set-aside pacer (Apr 15 / Jun 15 / Sep 15 / Jan 15). Default output is CPA-first handoff (with optional self-filing from the same verified workbook); defer 50-state nexus threshold alarms and resale-certificate vaults beyond V1.",
+          "from": "implemented",
+          "implementation_ref": "docs/CHARTER.md",
+          "note": "verification recorded in cumulative context",
+          "repair_required": false,
+          "review_classifications": [],
+          "review_ref": null,
+          "review_result": null,
+          "review_source_identity": null,
+          "to": "verified",
+          "verification_ref": "proof/grill-charter-20261025/PROOF.md"
         }
       ],
       "id": "d4-continuous-tax-engine",
@@ -278,13 +346,23 @@
       "rationale": "Eliminates monthly county sales-tax spreadsheet pain for zsh across any payment gateway, ends Q4 tax surprises, and keeps the merchant's CPA as the filing shield between the business and tax authorities.",
       "repair_required": false,
       "review_classifications": [],
-      "review_history": [],
+      "review_history": [
+        {
+          "classifications": [
+            "required_fix"
+          ],
+          "ref": "proof/grill-charter-20261025/REVIEW_1.md",
+          "result": "findings",
+          "reviewed_at": "2026-10-25T23:14:34+00:00",
+          "source_identity": "git:e7377ee8805d02f9182b8b5681f28fc7777138ba"
+        }
+      ],
       "review_ref": null,
       "review_result": null,
       "review_source_identity": null,
       "status": "verified",
       "superseded_by": null,
-      "updated_at": "2026-10-25T15:08:37+00:00",
+      "updated_at": "2026-10-25T23:14:34+00:00",
       "verification_ref": "proof/grill-charter-20261025/PROOF.md"
     },
     {
@@ -339,6 +417,50 @@
           "review_source_identity": null,
           "to": "verified",
           "verification_ref": null
+        },
+        {
+          "at": "2026-10-25T23:14:34+00:00",
+          "choice": "Built-in Gusto Payroll Connector inside @dinkuskit/books (using customer-facing gusto-mcp / gusto-cli OAuth + GL CSV drops for pre-payday Safe-to-Spend checks and zsh.00 clearing reconciliation of GUSTO NET / GUSTO TAX debits) + native free 1099-NEC/1099-MISC contractor tracking and IRS IRIS CSV export; hard-reject native W-2 payroll calculation/impounding.",
+          "from": "verified",
+          "implementation_ref": "docs/CHARTER.md",
+          "note": "adjudicated review requires a fix",
+          "repair_required": false,
+          "review_classifications": [],
+          "review_ref": null,
+          "review_result": null,
+          "review_source_identity": null,
+          "to": "needs_reverification",
+          "verification_ref": "proof/grill-charter-20261025/PROOF.md"
+        },
+        {
+          "at": "2026-10-25T23:14:35+00:00",
+          "choice": "Built-in Gusto Payroll Connector inside @dinkuskit/books (using customer-facing gusto-mcp / gusto-cli OAuth + GL CSV drops for pre-payday Safe-to-Spend checks and zsh.00 clearing reconciliation of GUSTO NET / GUSTO TAX debits) + native free 1099-NEC/1099-MISC contractor tracking and IRS IRIS CSV export; hard-reject native W-2 payroll calculation/impounding.",
+          "from": "needs_reverification",
+          "implementation_ref": "docs/CHARTER.md",
+          "note": "bounded implementation recorded",
+          "repair_required": true,
+          "review_classifications": [
+            "required_fix"
+          ],
+          "review_ref": "proof/grill-charter-20261025/REVIEW_1.md",
+          "review_result": "findings",
+          "review_source_identity": "git:e7377ee8805d02f9182b8b5681f28fc7777138ba",
+          "to": "implemented",
+          "verification_ref": "proof/grill-charter-20261025/PROOF.md"
+        },
+        {
+          "at": "2026-10-25T23:14:35+00:00",
+          "choice": "Built-in Gusto Payroll Connector inside @dinkuskit/books (using customer-facing gusto-mcp / gusto-cli OAuth + GL CSV drops for pre-payday Safe-to-Spend checks and zsh.00 clearing reconciliation of GUSTO NET / GUSTO TAX debits) + native free 1099-NEC/1099-MISC contractor tracking and IRS IRIS CSV export; hard-reject native W-2 payroll calculation/impounding.",
+          "from": "implemented",
+          "implementation_ref": "docs/CHARTER.md",
+          "note": "verification recorded in cumulative context",
+          "repair_required": false,
+          "review_classifications": [],
+          "review_ref": null,
+          "review_result": null,
+          "review_source_identity": null,
+          "to": "verified",
+          "verification_ref": "proof/grill-charter-20261025/PROOF.md"
         }
       ],
       "id": "d5-payroll-and-1099-boundary",
@@ -347,13 +469,23 @@
       "rationale": "Avoids IRC 6672 personal trust-fund liability and Gusto partner-API gates while making Gusto effortless on EmDash and saving 1099-only businesses /mo + /contractor.",
       "repair_required": false,
       "review_classifications": [],
-      "review_history": [],
+      "review_history": [
+        {
+          "classifications": [
+            "required_fix"
+          ],
+          "ref": "proof/grill-charter-20261025/REVIEW_1.md",
+          "result": "findings",
+          "reviewed_at": "2026-10-25T23:14:34+00:00",
+          "source_identity": "git:e7377ee8805d02f9182b8b5681f28fc7777138ba"
+        }
+      ],
       "review_ref": null,
       "review_result": null,
       "review_source_identity": null,
       "status": "verified",
       "superseded_by": null,
-      "updated_at": "2026-10-25T15:08:37+00:00",
+      "updated_at": "2026-10-25T23:14:35+00:00",
       "verification_ref": "proof/grill-charter-20261025/PROOF.md"
     },
     {
@@ -416,13 +548,21 @@
       "rationale": "Preserves the DinkusKit human+agent side-by-side principle while keeping humans and CPAs in control of legal/tax sign-off.",
       "repair_required": false,
       "review_classifications": [],
-      "review_history": [],
-      "review_ref": null,
-      "review_result": null,
-      "review_source_identity": null,
+      "review_history": [
+        {
+          "classifications": [],
+          "ref": "proof/grill-charter-20261025/REVIEW_1.md",
+          "result": "clean",
+          "reviewed_at": "2026-10-25T23:14:34+00:00",
+          "source_identity": "git:e7377ee8805d02f9182b8b5681f28fc7777138ba"
+        }
+      ],
+      "review_ref": "proof/grill-charter-20261025/REVIEW_1.md",
+      "review_result": "clean",
+      "review_source_identity": "git:e7377ee8805d02f9182b8b5681f28fc7777138ba",
       "status": "verified",
       "superseded_by": null,
-      "updated_at": "2026-10-25T15:08:37+00:00",
+      "updated_at": "2026-10-25T23:14:34+00:00",
       "verification_ref": "proof/grill-charter-20261025/PROOF.md"
     }
   ],
@@ -444,5 +584,5 @@
   "status": "active",
   "title": "DinkusKit Books \u2014 Charter & Scope",
   "track_id": "gt-20261025142221-8223a4",
-  "updated_at": "2026-10-25T15:08:37+00:00"
+  "updated_at": "2026-10-25T23:14:35+00:00"
 }

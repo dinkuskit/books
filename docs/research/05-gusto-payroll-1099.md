@@ -16,7 +16,7 @@ Operating W-2 payroll is running a regulated multi-jurisdiction tax agency and c
 
 Contractor tracking is pure **AP ledger metadata + annual information reporting** (zero per-paycheck tax withholding, zero FBO trust float, zero MTLs):
 - **Onboarding & Corporate Exemption:** Capture `Form W-9` (exempting C-Corps and S-Corps except **attorneys/law firms**, which are always reportable).
-- **2026 OBBBA Threshold vs. State Non-Conformity:** Federal `1099-NEC` and `1099-MISC` reporting rose from `$600` (TY2025) to **`$2,000` starting Tax Year 2026** under OBBBA, **but several states still require state `1099` reporting at `$600`**. Track vendor disbursements from `$0.01` and collect `W-9` before `$600`.
+- **2026 OBBBA Thresholds (By Form & Box) vs. State Non-Conformity:** Under OBBBA (`IRC §§ 6041, 6041A`), the general federal threshold for `1099-NEC` Box 1 nonemployee compensation (including direct legal-service fees) and general `1099-MISC` boxes (Box 1 rents, Box 3 other income, Box 6 medical/health care payments) rose from `$600` (`TY2025`) to **`$2,000` starting Tax Year 2026** (inflation-indexed after `TY2026`). **However, lower statutory federal thresholds remain unchanged**—specifically **`$10`** for `1099-MISC` Box 2 royalties (`IRC § 6050N`) and Box 8 broker substitute payments (`IRC § 6045(d)`), **`$600`** for `1099-MISC` Box 10 gross proceeds paid to an attorney (`IRC § 6045(f)`) and other statutory boxes outside `§§ 6041/6041A`, and **`$0.01+` (any amount)** whenever federal income tax is backup-withheld in Box 4 (`IRC § 3406`)—and **several states still require state `1099` reporting at `$600`**. Track vendor disbursements by form and box from `$0.01` and collect `W-9` before first payment (or well ahead of applicable `$10` / `$600` thresholds).
 - **Payment-Rail Exclusion (`IRC § 6050W`):** Automatically include `ach | check | wire | cash` and exclude `card | stripe | paypal | venmo_business` (reported by processors on `1099-K`).
 - **Free IRS IRIS CSV E-File:** `10+` combined returns (`W-2` + `1099`) mandate electronic filing (`TD 9972`); IRS **IRIS Portal** accepts free official CSV bulk uploads by Jan 31 (`1099-NEC`) / Mar 31 (`1099-MISC`).
 
@@ -39,7 +39,7 @@ Gusto's `totals` schema splits company cash pulls into exact ACH legs (`PPD ID: 
 
 - **REJECT Native W-2 Payroll Engine (Option A):** Existential `IRC § 6672` personal liability, ~50 state MTLs, and 5,000+ local tax tables for zero differentiation against a `$49/mo` commodity.
 - **ADOPT Native `1099` Vendor Module + 3-Lane `PayrollRunImport` Clearing Bridge in `books` (Option B):**
-  1. Native `1099-NEC` / `1099-MISC` vendor compliance (masked TIN/vault ref, `W-9` status, `$600` state / `$2,000` federal TY2026 thresholds, `payment_rail` `1099-K` exclusion, IRS IRIS CSV export).
+  1. Native `1099-NEC` / `1099-MISC` vendor compliance (masked TIN/vault ref, `W-9` status, form/box/year-specific federal thresholds—`$2,000` `TY2026+` general `§§ 6041/6041A`, `$10` Box 2 royalties / Box 8 substitute payments, `$600` Box 10 attorney gross proceeds, `$0.01+` Box 4 backup withholding—plus `$600` non-conforming state flags, `payment_rail` `1099-K` exclusion, and IRS IRIS CSV export).
   2. Provider-agnostic `PayrollRunImport` schema + zero-balance **Payroll Clearing Health Card** fed via: (Lane 1) drag-and-drop Gusto GL CSV in EmDash Admin, (Lane 2) side-by-side agent sync via `gusto-cli` / `gusto-mcp` -> `books payroll import`, and (Lane 3) optional hosted Cloud OAuth/webhook relay later.
 - **DEFER Separate `dinkuskit/payroll` Plugin; Lock Boundaries Now (Option C):** Never store employee SSNs, `W-4`s, or bank routing numbers inside `books`; any future payroll integration emits idempotent `PayrollRunImport` journals + `ExpectedBankDebit` match hints.
 
@@ -52,5 +52,6 @@ Gusto's `totals` schema splits company cash pulls into exact ACH legs (`PPD ID: 
 - https://gusto.com/product/integrations/gusto-cli
 - https://gusto.com/product/integrations/gusto-mcp
 - https://www.irs.gov/forms-pubs/about-form-1099-nec
+- https://www.irs.gov/instructions/i1099mec
 - https://www.irs.gov/filing/e-file-forms-1099-with-iris
 - https://www.irs.gov/businesses/small-businesses-self-employed/s-corporation-compensation-and-medical-insurance-issues
