@@ -78,14 +78,21 @@
           "result": "clean",
           "reviewed_at": "2026-10-25T23:14:34+00:00",
           "source_identity": "git:e7377ee8805d02f9182b8b5681f28fc7777138ba"
+        },
+        {
+          "classifications": [],
+          "ref": "proof/grill-charter-20261025/REVIEW_2.md",
+          "result": "clean",
+          "reviewed_at": "2026-10-25T23:17:53+00:00",
+          "source_identity": "git:ae26ea22ac348b1a36dacd04257cd9ad7cd09bf0"
         }
       ],
-      "review_ref": "proof/grill-charter-20261025/REVIEW_1.md",
+      "review_ref": "proof/grill-charter-20261025/REVIEW_2.md",
       "review_result": "clean",
-      "review_source_identity": "git:e7377ee8805d02f9182b8b5681f28fc7777138ba",
+      "review_source_identity": "git:ae26ea22ac348b1a36dacd04257cd9ad7cd09bf0",
       "status": "verified",
       "superseded_by": null,
-      "updated_at": "2026-10-25T23:14:34+00:00",
+      "updated_at": "2026-10-25T23:17:53+00:00",
       "verification_ref": "proof/grill-charter-20261025/PROOF.md"
     },
     {
@@ -155,14 +162,21 @@
           "result": "clean",
           "reviewed_at": "2026-10-25T23:14:34+00:00",
           "source_identity": "git:e7377ee8805d02f9182b8b5681f28fc7777138ba"
+        },
+        {
+          "classifications": [],
+          "ref": "proof/grill-charter-20261025/REVIEW_2.md",
+          "result": "clean",
+          "reviewed_at": "2026-10-25T23:17:53+00:00",
+          "source_identity": "git:ae26ea22ac348b1a36dacd04257cd9ad7cd09bf0"
         }
       ],
-      "review_ref": "proof/grill-charter-20261025/REVIEW_1.md",
+      "review_ref": "proof/grill-charter-20261025/REVIEW_2.md",
       "review_result": "clean",
-      "review_source_identity": "git:e7377ee8805d02f9182b8b5681f28fc7777138ba",
+      "review_source_identity": "git:ae26ea22ac348b1a36dacd04257cd9ad7cd09bf0",
       "status": "verified",
       "superseded_by": null,
-      "updated_at": "2026-10-25T23:14:34+00:00",
+      "updated_at": "2026-10-25T23:17:53+00:00",
       "verification_ref": "proof/grill-charter-20261025/PROOF.md"
     },
     {
@@ -232,14 +246,21 @@
           "result": "clean",
           "reviewed_at": "2026-10-25T23:14:34+00:00",
           "source_identity": "git:e7377ee8805d02f9182b8b5681f28fc7777138ba"
+        },
+        {
+          "classifications": [],
+          "ref": "proof/grill-charter-20261025/REVIEW_2.md",
+          "result": "clean",
+          "reviewed_at": "2026-10-25T23:17:53+00:00",
+          "source_identity": "git:ae26ea22ac348b1a36dacd04257cd9ad7cd09bf0"
         }
       ],
-      "review_ref": "proof/grill-charter-20261025/REVIEW_1.md",
+      "review_ref": "proof/grill-charter-20261025/REVIEW_2.md",
       "review_result": "clean",
-      "review_source_identity": "git:e7377ee8805d02f9182b8b5681f28fc7777138ba",
+      "review_source_identity": "git:ae26ea22ac348b1a36dacd04257cd9ad7cd09bf0",
       "status": "verified",
       "superseded_by": null,
-      "updated_at": "2026-10-25T23:14:34+00:00",
+      "updated_at": "2026-10-25T23:17:53+00:00",
       "verification_ref": "proof/grill-charter-20261025/PROOF.md"
     },
     {
@@ -355,14 +376,21 @@
           "result": "findings",
           "reviewed_at": "2026-10-25T23:14:34+00:00",
           "source_identity": "git:e7377ee8805d02f9182b8b5681f28fc7777138ba"
+        },
+        {
+          "classifications": [],
+          "ref": "proof/grill-charter-20261025/REVIEW_2.md",
+          "result": "clean",
+          "reviewed_at": "2026-10-25T23:17:53+00:00",
+          "source_identity": "git:ae26ea22ac348b1a36dacd04257cd9ad7cd09bf0"
         }
       ],
-      "review_ref": null,
-      "review_result": null,
-      "review_source_identity": null,
+      "review_ref": "proof/grill-charter-20261025/REVIEW_2.md",
+      "review_result": "clean",
+      "review_source_identity": "git:ae26ea22ac348b1a36dacd04257cd9ad7cd09bf0",
       "status": "verified",
       "superseded_by": null,
-      "updated_at": "2026-10-25T23:14:34+00:00",
+      "updated_at": "2026-10-25T23:17:53+00:00",
       "verification_ref": "proof/grill-charter-20261025/PROOF.md"
     },
     {
@@ -461,6 +489,50 @@
           "review_source_identity": null,
           "to": "verified",
           "verification_ref": "proof/grill-charter-20261025/PROOF.md"
+        },
+        {
+          "at": "2026-10-25T23:17:54+00:00",
+          "choice": "Built-in Gusto Payroll Connector inside @dinkuskit/books (using customer-facing gusto-mcp / gusto-cli OAuth + GL CSV drops for pre-payday Safe-to-Spend checks and zsh.00 clearing reconciliation of GUSTO NET / GUSTO TAX debits) + native free 1099-NEC/1099-MISC contractor tracking and IRS IRIS CSV export; hard-reject native W-2 payroll calculation/impounding.",
+          "from": "verified",
+          "implementation_ref": "docs/CHARTER.md",
+          "note": "adjudicated review requires a fix",
+          "repair_required": false,
+          "review_classifications": [],
+          "review_ref": null,
+          "review_result": null,
+          "review_source_identity": null,
+          "to": "needs_reverification",
+          "verification_ref": "proof/grill-charter-20261025/PROOF.md"
+        },
+        {
+          "at": "2026-10-25T23:17:54+00:00",
+          "choice": "Built-in Gusto Payroll Connector inside @dinkuskit/books (using customer-facing gusto-mcp / gusto-cli OAuth + GL CSV drops for pre-payday Safe-to-Spend checks and zsh.00 clearing reconciliation of GUSTO NET / GUSTO TAX debits) + native free 1099-NEC/1099-MISC contractor tracking and IRS IRIS CSV export; hard-reject native W-2 payroll calculation/impounding.",
+          "from": "needs_reverification",
+          "implementation_ref": "docs/CHARTER.md",
+          "note": "bounded implementation recorded",
+          "repair_required": true,
+          "review_classifications": [
+            "required_fix"
+          ],
+          "review_ref": "proof/grill-charter-20261025/REVIEW_2.md",
+          "review_result": "findings",
+          "review_source_identity": "git:ae26ea22ac348b1a36dacd04257cd9ad7cd09bf0",
+          "to": "implemented",
+          "verification_ref": "proof/grill-charter-20261025/PROOF.md"
+        },
+        {
+          "at": "2026-10-25T23:17:54+00:00",
+          "choice": "Built-in Gusto Payroll Connector inside @dinkuskit/books (using customer-facing gusto-mcp / gusto-cli OAuth + GL CSV drops for pre-payday Safe-to-Spend checks and zsh.00 clearing reconciliation of GUSTO NET / GUSTO TAX debits) + native free 1099-NEC/1099-MISC contractor tracking and IRS IRIS CSV export; hard-reject native W-2 payroll calculation/impounding.",
+          "from": "implemented",
+          "implementation_ref": "docs/CHARTER.md",
+          "note": "verification recorded in cumulative context",
+          "repair_required": false,
+          "review_classifications": [],
+          "review_ref": null,
+          "review_result": null,
+          "review_source_identity": null,
+          "to": "verified",
+          "verification_ref": "proof/grill-charter-20261025/PROOF.md"
         }
       ],
       "id": "d5-payroll-and-1099-boundary",
@@ -478,6 +550,15 @@
           "result": "findings",
           "reviewed_at": "2026-10-25T23:14:34+00:00",
           "source_identity": "git:e7377ee8805d02f9182b8b5681f28fc7777138ba"
+        },
+        {
+          "classifications": [
+            "required_fix"
+          ],
+          "ref": "proof/grill-charter-20261025/REVIEW_2.md",
+          "result": "findings",
+          "reviewed_at": "2026-10-25T23:17:54+00:00",
+          "source_identity": "git:ae26ea22ac348b1a36dacd04257cd9ad7cd09bf0"
         }
       ],
       "review_ref": null,
@@ -485,7 +566,7 @@
       "review_source_identity": null,
       "status": "verified",
       "superseded_by": null,
-      "updated_at": "2026-10-25T23:14:35+00:00",
+      "updated_at": "2026-10-25T23:17:54+00:00",
       "verification_ref": "proof/grill-charter-20261025/PROOF.md"
     },
     {
@@ -555,14 +636,21 @@
           "result": "clean",
           "reviewed_at": "2026-10-25T23:14:34+00:00",
           "source_identity": "git:e7377ee8805d02f9182b8b5681f28fc7777138ba"
+        },
+        {
+          "classifications": [],
+          "ref": "proof/grill-charter-20261025/REVIEW_2.md",
+          "result": "clean",
+          "reviewed_at": "2026-10-25T23:17:54+00:00",
+          "source_identity": "git:ae26ea22ac348b1a36dacd04257cd9ad7cd09bf0"
         }
       ],
-      "review_ref": "proof/grill-charter-20261025/REVIEW_1.md",
+      "review_ref": "proof/grill-charter-20261025/REVIEW_2.md",
       "review_result": "clean",
-      "review_source_identity": "git:e7377ee8805d02f9182b8b5681f28fc7777138ba",
+      "review_source_identity": "git:ae26ea22ac348b1a36dacd04257cd9ad7cd09bf0",
       "status": "verified",
       "superseded_by": null,
-      "updated_at": "2026-10-25T23:14:34+00:00",
+      "updated_at": "2026-10-25T23:17:54+00:00",
       "verification_ref": "proof/grill-charter-20261025/PROOF.md"
     }
   ],
@@ -584,5 +672,5 @@
   "status": "active",
   "title": "DinkusKit Books \u2014 Charter & Scope",
   "track_id": "gt-20261025142221-8223a4",
-  "updated_at": "2026-10-25T23:14:35+00:00"
+  "updated_at": "2026-10-25T23:17:54+00:00"
 }
