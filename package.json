@@ -1,7 +1,7 @@
 {
   "name": "@dinkuskit/books",
   "version": "0.0.0",
-  "description": "Bookkeeping, payout reconciliation, and continuous tax readiness for DinkusKit on EmDash",
+  "description": "The bookkeeping, reconciliation, and tax-readiness ledger for EmDash sites",
   "type": "module",
   "private": true,
   "license": "MIT",
