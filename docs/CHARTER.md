@@ -34,7 +34,7 @@ Business-sensitive tenant figures, bank/card identifiers, tax filings, and priva
 
 ## `d3-accounting-basis-and-cogs` — Simple `Cash | Accrual` Toggle; Defer Live `Inventory` Sync (locked)
 
-1. **Dual-Date Append-Only Ledger:** Every economic event records integer minor-unit amounts alongside both `transaction_date` (when the sale, bill, or charge occurred) and `settled_date` (when cash cleared checking or processor settlement), enabling a 1-click **`Cash | Accrual` toggle** on Profit & Loss and Balance Sheet reports from a single immutable journal.
+1. **Dual-Date Append-Only Double-Entry Core ([`src/ledger/`](../src/ledger/README.md)):** Underneath `@dinkuskit/books`, [`src/ledger/`](../src/ledger/README.md) is a small, platform-neutral, append-only double-entry module that enforces `sum(debits) === sum(credits)` in integer minor units on every write (using linked reversing entries rather than destructive edits). Every economic event records both `transaction_date` (when the sale, bill, or charge occurred) and `settled_date` (when cash cleared checking or processor settlement), enabling a 1-click **`Cash | Accrual` toggle** on Profit & Loss and Balance Sheet reports from a single immutable journal.
 2. **V1 Inventory Simplicity:** Supplier inventory purchases are categorized cleanly as standard purchase/COGS accounts in V1 (with optional manual CPA year-end inventory count adjustments). Live SKU movement and cost-layer wiring with `@dinkuskit/inventory` is **explicitly deferred** beyond V1 to keep the core ledger standalone and lean.
 
 ---

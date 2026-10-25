@@ -42,6 +42,21 @@ public.
   statement reconciliation locks, period closes, and external CPA/tax handoffs
   are strictly human-gated.
 
+## Architecture layout
+
+- **Outer product (`@dinkuskit/books`) vs. inner double-entry core
+  ([`src/ledger/`](src/ledger/README.md)):** `@dinkuskit/books` owns the
+  merchant- and CPA-facing bookkeeping, reconciliation, and tax-readiness
+  workflows; [`src/ledger/`](src/ledger/README.md) is the small, append-only
+  minor-unit double-entry database module underneath that enforces
+  `sum(debits) === sum(credits)` on every write and records reversals instead of
+  mutating posted rows.
+- **Adapter-free kernel boundary:** `src/ledger/` must stay platform- and
+  adapter-neutral—never importing EmDash Admin UI, HTTP routes, CLI/MCP
+  transports, county sales-tax schedule packs, or companion plugins. Every
+  balance-affecting write in `@dinkuskit/books` flows through
+  `src/ledger/index.ts`.
+
 ## State and gates
 
 - Charter locked (`0.0.0`, `private: true`). Add implementation only after its

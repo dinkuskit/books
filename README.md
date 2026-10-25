@@ -35,6 +35,21 @@ See [`docs/CHARTER.md`](docs/CHARTER.md) and the
   `gusto-cli` / CSV clearing to `$0.00` + free IRS IRIS `1099` CSVs; no native
   `W-2` withholding liability).
 
+## Architecture
+
+- **Outer product (`@dinkuskit/books`):** EmDash Admin UI (`Safe to Spend`
+  header, Bank & Multi-Processor Reconciliation, Gusto tab, County Sales-Tax
+  Workbooks, `Cash | Accrual` reports, `cpa-pack`), `emdash books` CLI,
+  read-default `books.*` MCP tools, and optional Commerce/Payments/Ship
+  adapters.
+- **Inner double-entry engine ([`src/ledger/`](src/ledger/README.md)):** Small,
+  platform-neutral, append-only integer minor-unit accounting core underneath
+  `@dinkuskit/books` that enforces `Debits == Credits` on every write and uses
+  reversing entries instead of destructive row edits.
+- **Decoupled US County & State Sales-Tax Schedule library:** Framework-agnostic
+  open-source jurisdiction resolver and state return-schedule builder usable
+  standalone inside or outside EmDash.
+
 ## Status
 
 Charter locked (`0.0.0`, `private: true`). Runtime implementation proceeds
