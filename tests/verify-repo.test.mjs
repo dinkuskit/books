@@ -200,6 +200,71 @@ test("rejects public-safety leaks and .env files", async () => {
     const leakedPath = "/Users" + "/example/private.txt";
     await writeFile(path.join(root, "docs/CHARTER.md"), `# Charter\n\nPath: ${leakedPath}\n`, "utf8");
     await assert.rejects(() => verifyRepository(root), /public-safety violation/);
+
+    await writeFile(path.join(root, "docs/CHARTER.md"), "# Charter\n\nSee [Proof](../proof/PROOF.md).\n", "utf8");
+    await mkdir(path.join(root, "dist"), { recursive: true });
+    await writeFile(path.join(root, "dist/.ENV"), "PLACEHOLDER=1\n", "utf8");
+    await assert.rejects(() => verifyRepository(root), /forbidden environment file/);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("scans Git-tracked files inside ignored directories while skipping untracked build outputs", async () => {
+  const { execFile: execFileCb } = await import("node:child_process");
+  const { promisify } = await import("node:util");
+  const execFile = promisify(execFileCb);
+
+  const { root } = await createMinimalValidFixture();
+  try {
+    await writeFile(
+      path.join(root, ".gitignore"),
+      "node_modules/\ndist/\n.astro/\ncoverage/\n.grilltrack/work/\n.env\n.env.*\n!.env.example\n",
+      "utf8",
+    );
+    await execFile("git", ["init", "-q"], { cwd: root });
+    await execFile("git", ["add", "."], { cwd: root });
+
+    // Untracked local build/dependency artifacts should not trip link or env checks
+    await mkdir(path.join(root, "node_modules/pkg"), { recursive: true });
+    await writeFile(path.join(root, "node_modules/pkg/README.md"), "See [Missing](./missing.md)\n", "utf8");
+    await mkdir(path.join(root, "dist"), { recursive: true });
+    await writeFile(path.join(root, "dist/untracked.md"), "See [Missing](./missing.md)\n", "utf8");
+    await verifyRepository(root);
+
+    // Force-tracked .env inside dist/ must fail verification
+    await writeFile(path.join(root, "dist/.env"), "PLACEHOLDER=1\n", "utf8");
+    await execFile("git", ["add", "-f", "dist/.env"], { cwd: root });
+    await assert.rejects(() => verifyRepository(root), /forbidden environment file/);
+    await execFile("git", ["rm", "-f", "-q", "dist/.env"], { cwd: root });
+
+    // Force-tracked public-safety violation inside node_modules/ and .grilltrack/work/ must fail
+    const fakeToken = "ghp_" + "A".repeat(36);
+    for (const ignoredRel of [
+      "node_modules/pkg/leak.txt",
+      ".astro/leak.txt",
+      "coverage/leak.txt",
+      ".grilltrack/work/leak.txt",
+    ]) {
+      const target = path.join(root, ignoredRel);
+      await mkdir(path.dirname(target), { recursive: true });
+      await writeFile(target, `token=${fakeToken}\n`, "utf8");
+      await execFile("git", ["add", "-f", ignoredRel], { cwd: root });
+      await assert.rejects(() => verifyRepository(root), /public-safety violation/);
+      await execFile("git", ["rm", "-f", "-q", ignoredRel], { cwd: root });
+    }
+
+    // Staged secret deleted from working tree without git rm must still fail
+    await writeFile(path.join(root, "dist/staged-only.txt"), `token=${fakeToken}\n`, "utf8");
+    await execFile("git", ["add", "-f", "dist/staged-only.txt"], { cwd: root });
+    await rm(path.join(root, "dist/staged-only.txt"));
+    await assert.rejects(() => verifyRepository(root), /public-safety violation/);
+    await execFile("git", ["rm", "--cached", "-q", "dist/staged-only.txt"], { cwd: root });
+
+    // Clean force-tracked markdown inside dist/ skips relative link check but passes public-safety scan
+    await writeFile(path.join(root, "dist/BUILD_NOTES.md"), "Generated output: [Bundle](./missing-bundle.js)\n", "utf8");
+    await execFile("git", ["add", "-f", "dist/BUILD_NOTES.md"], { cwd: root });
+    await verifyRepository(root);
   } finally {
     await rm(root, { recursive: true, force: true });
   }

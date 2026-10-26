@@ -1,6 +1,10 @@
+import { execFile as execFileCb } from "node:child_process";
 import { lstat, readdir, readFile, realpath, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { promisify } from "node:util";
+
+const execFile = promisify(execFileCb);
 
 const DECISION_STATES = new Set([
   "proposed",
@@ -65,7 +69,61 @@ const PUBLIC_SAFETY_PATTERNS = [
   },
 ];
 
-const IGNORED_DIRS = new Set([".git", "node_modules", "dist", ".astro", "coverage"]);
+const UNTRACKED_IGNORED_DIRS = new Set(["node_modules", "dist", ".astro", "coverage"]);
+
+function isForbiddenEnvFile(baseName) {
+  const lower = baseName.toLowerCase();
+  return (lower === ".env" || lower.startsWith(".env.")) && lower !== ".env.example";
+}
+
+function isIgnoredBuildPath(relPath) {
+  if (relPath === ".grilltrack/work" || relPath.startsWith(".grilltrack/work/")) {
+    return true;
+  }
+  return relPath.split("/").some((segment) => UNTRACKED_IGNORED_DIRS.has(segment));
+}
+
+async function hasGitCheckoutMarker(repoRealPath) {
+  try {
+    const gitStat = await lstat(path.join(repoRealPath, ".git"));
+    if (gitStat.isSymbolicLink()) {
+      throw new Error(".git must not be a symbolic link");
+    }
+    return gitStat.isDirectory() || gitStat.isFile();
+  } catch (err) {
+    if (err && err.code === "ENOENT") {
+      return false;
+    }
+    throw err;
+  }
+}
+
+async function listGitStageEntries(repoRealPath) {
+  const { stdout } = await execFile("git", ["-C", repoRealPath, "ls-files", "--stage", "-z"], {
+    encoding: "buffer",
+    maxBuffer: 64 * 1024 * 1024,
+  });
+  const records = stdout.toString("utf8").split("\0").filter(Boolean);
+  const entries = [];
+  for (const record of records) {
+    const tabIdx = record.indexOf("\t");
+    if (tabIdx <= 0) {
+      throw new Error(`unexpected git ls-files --stage entry: ${record}`);
+    }
+    const meta = record.slice(0, tabIdx).trim().split(/\s+/);
+    const relPath = record.slice(tabIdx + 1);
+    entries.push({ mode: meta[0], relPath });
+  }
+  return entries;
+}
+
+async function readGitIndexBlob(repoRealPath, relPath) {
+  const { stdout } = await execFile("git", ["-C", repoRealPath, "cat-file", "-p", `:${relPath}`], {
+    encoding: "buffer",
+    maxBuffer: 64 * 1024 * 1024,
+  });
+  return stdout.toString("utf8");
+}
 
 function isWithinRoot(candidatePath, rootPath) {
   const rel = path.relative(rootPath, candidatePath);
@@ -165,8 +223,7 @@ function extractMarkdownLinks(markdown) {
 async function walkRepoFiles(
   dirPath,
   repoRealPath,
-  relPrefix = "",
-  visitedDirs = new Set([repoRealPath]),
+  { skipUntrackedBuildDirs = false, relPrefix = "", visitedDirs = new Set([repoRealPath]) } = {},
 ) {
   const entries = await readdir(dirPath, { withFileTypes: true });
   entries.sort((a, b) => a.name.localeCompare(b.name));
@@ -174,22 +231,27 @@ async function walkRepoFiles(
 
   for (const entry of entries) {
     const relPath = relPrefix ? `${relPrefix}/${entry.name}` : entry.name;
-    if (IGNORED_DIRS.has(entry.name)) continue;
-    if (relPath === ".grilltrack/work") continue;
+    if (entry.name === ".git") continue;
+    if (skipUntrackedBuildDirs && UNTRACKED_IGNORED_DIRS.has(entry.name)) continue;
+    if (skipUntrackedBuildDirs && relPath === ".grilltrack/work") continue;
 
     const fullPath = path.join(dirPath, entry.name);
     const lst = await lstat(fullPath);
     let effectiveStat = lst;
     let effectiveRealDir = null;
+    let resolvedPath = fullPath;
 
     if (lst.isSymbolicLink()) {
       const targetReal = await resolveInsideRepo(repoRealPath, dirPath, entry.name, relPath);
+      resolvedPath = targetReal;
       effectiveStat = await stat(targetReal);
       if (effectiveStat.isDirectory()) {
         effectiveRealDir = targetReal;
       }
     } else if (lst.isDirectory()) {
       effectiveRealDir = await realpath(fullPath);
+    } else if (lst.isFile()) {
+      resolvedPath = await realpath(fullPath);
     }
 
     if (effectiveStat.isDirectory()) {
@@ -198,9 +260,20 @@ async function walkRepoFiles(
       }
       const nextVisited = new Set(visitedDirs);
       if (effectiveRealDir) nextVisited.add(effectiveRealDir);
-      files.push(...(await walkRepoFiles(fullPath, repoRealPath, relPath, nextVisited)));
+      files.push(
+        ...(await walkRepoFiles(fullPath, repoRealPath, {
+          skipUntrackedBuildDirs,
+          relPrefix: relPath,
+          visitedDirs: nextVisited,
+        })),
+      );
     } else if (effectiveStat.isFile()) {
-      files.push({ fullPath, relPath });
+      files.push({
+        fullPath,
+        resolvedPath,
+        relPath,
+        skipMarkdownLinks: isIgnoredBuildPath(relPath),
+      });
     }
   }
   return files;
@@ -325,6 +398,24 @@ async function verifyGrillTrack(repoRealPath) {
       await resolveInsideRepo(repoRealPath, repoRealPath, normalizedRef, `${decision.id}.${refField}`);
     }
 
+    if (!Array.isArray(decision.candidate_refs)) {
+      throw new Error(`${decision.id}.candidate_refs must be an array`);
+    }
+    for (const [idx, candRef] of decision.candidate_refs.entries()) {
+      if (typeof candRef !== "string" || !candRef.trim()) {
+        throw new Error(`${decision.id}.candidate_refs[${idx}] must be a non-empty string`);
+      }
+      const normalizedCand = candRef.startsWith("file:")
+        ? candRef.slice("file:".length)
+        : candRef;
+      await resolveInsideRepo(
+        repoRealPath,
+        repoRealPath,
+        normalizedCand,
+        `${decision.id}.candidate_refs[${idx}]`,
+      );
+    }
+
     const hasAnyReviewField =
       decision.review_ref !== null ||
       decision.review_source_identity !== null ||
@@ -389,6 +480,94 @@ async function verifyGrillTrack(repoRealPath) {
   return { decisions: ledger.decisions.length, events: eventLines.length };
 }
 
+async function collectFilesForVerification(repoRealPath) {
+  const isGitCheckout = await hasGitCheckoutMarker(repoRealPath);
+  const walkedFiles = await walkRepoFiles(repoRealPath, repoRealPath, {
+    skipUntrackedBuildDirs: isGitCheckout,
+  });
+
+  if (!isGitCheckout) {
+    return walkedFiles;
+  }
+
+  const byRelPath = new Map(walkedFiles.map((entry) => [entry.relPath, entry]));
+  const stageEntries = await listGitStageEntries(repoRealPath);
+  const { stdout: unstagedDiffOut } = await execFile(
+    "git",
+    ["-C", repoRealPath, "diff", "--name-only", "-z"],
+    { encoding: "buffer", maxBuffer: 64 * 1024 * 1024 },
+  );
+  const unstagedModified = new Set(unstagedDiffOut.toString("utf8").split("\0").filter(Boolean));
+
+  for (const { mode, relPath } of stageEntries) {
+    if (mode === "160000") {
+      throw new Error(`submodules/gitlinks are not allowed: ${relPath}`);
+    }
+    if (isForbiddenEnvFile(path.basename(relPath))) {
+      throw new Error(`forbidden environment file present: ${relPath}`);
+    }
+
+    const fullPath = path.resolve(repoRealPath, relPath);
+    if (!isWithinRoot(fullPath, repoRealPath)) {
+      throw new Error(`${relPath}: path escapes repository root`);
+    }
+
+    let diskExists = true;
+    try {
+      await lstat(fullPath);
+    } catch (err) {
+      if (err && err.code === "ENOENT") {
+        diskExists = false;
+      } else {
+        throw err;
+      }
+    }
+
+    if (diskExists) {
+      const resolvedPath = await resolveInsideRepo(repoRealPath, repoRealPath, relPath, relPath);
+      if (isForbiddenEnvFile(path.basename(resolvedPath))) {
+        throw new Error(`forbidden environment file target: ${relPath}`);
+      }
+      const targetStat = await stat(resolvedPath);
+      if (targetStat.isFile()) {
+        const extraIndexContent = unstagedModified.has(relPath)
+          ? await readGitIndexBlob(repoRealPath, relPath)
+          : undefined;
+        byRelPath.set(relPath, {
+          fullPath,
+          resolvedPath,
+          relPath,
+          extraIndexContent,
+          skipMarkdownLinks: isIgnoredBuildPath(relPath),
+        });
+      }
+    } else {
+      const indexContent = await readGitIndexBlob(repoRealPath, relPath);
+      if (mode === "120000") {
+        const rawTarget = indexContent.replace(/\r?\n$/, "");
+        const resolvedTarget = await resolveInsideRepo(
+          repoRealPath,
+          path.dirname(fullPath),
+          rawTarget,
+          relPath,
+        );
+        if (isForbiddenEnvFile(path.basename(resolvedTarget))) {
+          throw new Error(`forbidden environment file target: ${relPath}`);
+        }
+      }
+      byRelPath.set(relPath, {
+        fullPath,
+        resolvedPath: null,
+        relPath,
+        preloadedContent: indexContent,
+        skipMarkdownLinks: true,
+      });
+    }
+  }
+
+  return [...byRelPath.values()].sort((a, b) => a.relPath.localeCompare(b.relPath));
+}
+
 export async function verifyRepository(
   repoDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."),
 ) {
@@ -396,23 +575,37 @@ export async function verifyRepository(
   await verifyPackageManifest(repoRealPath);
   const grilltrackStats = await verifyGrillTrack(repoRealPath);
 
-  const files = await walkRepoFiles(repoRealPath, repoRealPath);
+  const files = await collectFilesForVerification(repoRealPath);
   let checkedLinks = 0;
 
-  for (const { fullPath, relPath } of files) {
-    const baseName = path.basename(relPath);
-    if ((baseName === ".env" || baseName.startsWith(".env.")) && baseName !== ".env.example") {
+  for (const {
+    fullPath,
+    resolvedPath,
+    relPath,
+    preloadedContent,
+    extraIndexContent,
+    skipMarkdownLinks,
+  } of files) {
+    if (
+      isForbiddenEnvFile(path.basename(relPath)) ||
+      (resolvedPath && isForbiddenEnvFile(path.basename(resolvedPath)))
+    ) {
       throw new Error(`forbidden environment file present: ${relPath}`);
     }
 
-    const content = await readFile(fullPath, "utf8");
-    for (const rule of PUBLIC_SAFETY_PATTERNS) {
-      if (rule.regex.test(content)) {
-        throw new Error(`public-safety violation (${rule.name}) in ${relPath}`);
+    const content =
+      preloadedContent !== undefined ? preloadedContent : await readFile(fullPath, "utf8");
+    for (const candidateContent of extraIndexContent !== undefined
+      ? [content, extraIndexContent]
+      : [content]) {
+      for (const rule of PUBLIC_SAFETY_PATTERNS) {
+        if (rule.regex.test(candidateContent)) {
+          throw new Error(`public-safety violation (${rule.name}) in ${relPath}`);
+        }
       }
     }
 
-    if (relPath.endsWith(".md")) {
+    if (relPath.endsWith(".md") && !skipMarkdownLinks) {
       const links = extractMarkdownLinks(content);
       const mdDir = path.dirname(fullPath);
       for (const rawLink of links) {
