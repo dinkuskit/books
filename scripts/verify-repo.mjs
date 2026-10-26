@@ -1,4 +1,5 @@
 import { execFile as execFileCb } from "node:child_process";
+import { createHash } from "node:crypto";
 import { lstat, readdir, readFile, realpath, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -34,13 +35,35 @@ const SHELL_CORRUPTION_PATTERNS = [
   },
   {
     name: "stripped currency before unit rate",
-    regex: /(?:^|[\s([+])\/(?:yr|mo|person|contractor|return)\b/,
+    regex: /(?:^|[\s([]|(?<![0-9kKmM])\+)\/(?:yr|mo|person|contractor|return)\b/,
   },
   {
     name: "stripped currency before thousands group",
     regex: /(?:^|[\s([+]),\d{3}\b/,
   },
 ];
+
+const FORBIDDEN_COORDINATE_SHA256 = new Set([
+  "071bebbe2c48bc5a5a11dc58b90b0160c53fa3a525cb086afebd2f399094f713",
+  "f551d2dfdfd8b8b887caba65cb4dcb17790698cf2e68193ced6f0ee38b6e808a",
+  "6e418d47bb0df81d6a2e4d1aeac47dab7d8a509ca84ecaac61a05488b8cc4bea",
+]);
+
+function hasForbiddenCoordinateToken(text) {
+  const seen = new Set();
+  for (const match of text.matchAll(/[A-Za-z0-9][A-Za-z0-9_-]{4,63}/g)) {
+    const raw = match[0].toLowerCase();
+    for (const candidate of [raw, raw.replace(/^[_-]+|[_-]+$/g, "")]) {
+      if (candidate.length < 5 || seen.has(candidate)) continue;
+      seen.add(candidate);
+      const digest = createHash("sha256").update(candidate).digest("hex");
+      if (FORBIDDEN_COORDINATE_SHA256.has(digest)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
 
 const PUBLIC_SAFETY_PATTERNS = [
   {
@@ -62,10 +85,6 @@ const PUBLIC_SAFETY_PATTERNS = [
   {
     name: "local workstation user path",
     regex: new RegExp("(?:^|[^A-Za-z0-9])" + "/Users" + "/[A-Za-z0-9._-]+"),
-  },
-  {
-    name: "private organization coordinate",
-    regex: new RegExp("\\b" + "saari" + "-co/|\\b" + "bobby" + "bones\\b", "i"),
   },
 ];
 
@@ -150,6 +169,46 @@ async function resolveInsideRepo(repoRealPath, baseDir, rawTarget, contextLabel)
   return targetReal;
 }
 
+function stripInlineCodeSpans(line) {
+  let out = "";
+  let i = 0;
+  while (i < line.length) {
+    if (line[i] !== "`") {
+      out += line[i];
+      i += 1;
+      continue;
+    }
+    let tickCount = 1;
+    while (i + tickCount < line.length && line[i + tickCount] === "`") {
+      tickCount += 1;
+    }
+    let searchIdx = i + tickCount;
+    let closedAt = -1;
+    while (searchIdx < line.length) {
+      if (line[searchIdx] !== "`") {
+        searchIdx += 1;
+        continue;
+      }
+      let closeTicks = 1;
+      while (searchIdx + closeTicks < line.length && line[searchIdx + closeTicks] === "`") {
+        closeTicks += 1;
+      }
+      if (closeTicks === tickCount) {
+        closedAt = searchIdx + closeTicks;
+        break;
+      }
+      searchIdx += closeTicks;
+    }
+    if (closedAt !== -1) {
+      i = closedAt;
+    } else {
+      out += line.slice(i, i + tickCount);
+      i += tickCount;
+    }
+  }
+  return out;
+}
+
 function stripFencesAndInlineCode(markdown) {
   const lines = markdown.split(/\r?\n/);
   const kept = [];
@@ -175,7 +234,7 @@ function stripFencesAndInlineCode(markdown) {
       kept.push("");
       continue;
     }
-    kept.push(line.replace(/`+[^`]*`+/g, ""));
+    kept.push(stripInlineCodeSpans(line));
   }
   return kept.join("\n");
 }
@@ -185,9 +244,10 @@ function normalizeLinkDestination(rawSpec) {
   if (!raw) return null;
   if (raw.startsWith("<")) {
     const closeIdx = raw.indexOf(">");
-    if (closeIdx > 0) {
-      raw = raw.slice(1, closeIdx).trim();
+    if (closeIdx < 0) {
+      throw new Error(`unclosed angle-bracket link destination: ${rawSpec}`);
     }
+    raw = raw.slice(1, closeIdx).trim();
   } else {
     const spaceIdx = raw.search(/\s/);
     if (spaceIdx > 0) {
@@ -207,7 +267,7 @@ function normalizeLinkDestination(rawSpec) {
 function extractMarkdownLinks(markdown) {
   const scrubbed = stripFencesAndInlineCode(markdown);
   const results = [];
-  const inlineLinkRe = /!?\[[^\]]*\]\(((?:\([^()]*\)|[^()])+)\)/g;
+  const inlineLinkRe = /!?\[[^\]]*\]\((<[^>\r\n]*>|(?:\([^()]*\)|[^()])+)\)/g;
   for (const match of scrubbed.matchAll(inlineLinkRe)) {
     const normalized = normalizeLinkDestination(match[1]);
     if (normalized) results.push(normalized);
@@ -512,27 +572,57 @@ async function collectFilesForVerification(repoRealPath) {
       throw new Error(`${relPath}: path escapes repository root`);
     }
 
-    let diskExists = true;
+    let diskLstat = null;
     try {
-      await lstat(fullPath);
+      diskLstat = await lstat(fullPath);
     } catch (err) {
-      if (err && err.code === "ENOENT") {
-        diskExists = false;
-      } else {
+      if (!err || err.code !== "ENOENT") {
         throw err;
       }
     }
 
-    if (diskExists) {
+    if (mode === "120000") {
+      const indexTargetRaw = (await readGitIndexBlob(repoRealPath, relPath)).replace(/\r?\n$/, "");
+      const stagedTargetReal = await resolveInsideRepo(
+        repoRealPath,
+        path.dirname(fullPath),
+        indexTargetRaw,
+        `${relPath} (staged symlink)`,
+      );
+      if (isForbiddenEnvFile(path.basename(stagedTargetReal))) {
+        throw new Error(`forbidden environment file target: ${relPath}`);
+      }
+      const stagedTargetStat = await stat(stagedTargetReal);
+      if (stagedTargetStat.isDirectory()) {
+        const symlinkedFiles = await walkRepoFiles(stagedTargetReal, repoRealPath, {
+          skipUntrackedBuildDirs: false,
+          relPrefix: relPath,
+          visitedDirs: new Set([repoRealPath, stagedTargetReal]),
+        });
+        for (const entry of symlinkedFiles) {
+          byRelPath.set(entry.relPath, entry);
+        }
+      } else if (stagedTargetStat.isFile() && (!diskLstat || !diskLstat.isSymbolicLink())) {
+        byRelPath.set(`${relPath}#staged-symlink-target`, {
+          fullPath: stagedTargetReal,
+          resolvedPath: stagedTargetReal,
+          relPath,
+          skipMarkdownLinks: true,
+        });
+      }
+    }
+
+    if (diskLstat) {
       const resolvedPath = await resolveInsideRepo(repoRealPath, repoRealPath, relPath, relPath);
       if (isForbiddenEnvFile(path.basename(resolvedPath))) {
         throw new Error(`forbidden environment file target: ${relPath}`);
       }
       const targetStat = await stat(resolvedPath);
       if (targetStat.isFile()) {
-        const extraIndexContent = unstagedModified.has(relPath)
-          ? await readGitIndexBlob(repoRealPath, relPath)
-          : undefined;
+        const extraIndexContent =
+          mode !== "120000" && unstagedModified.has(relPath)
+            ? await readGitIndexBlob(repoRealPath, relPath)
+            : undefined;
         byRelPath.set(relPath, {
           fullPath,
           resolvedPath,
@@ -540,21 +630,30 @@ async function collectFilesForVerification(repoRealPath) {
           extraIndexContent,
           skipMarkdownLinks: isIgnoredBuildPath(relPath),
         });
-      }
-    } else {
-      const indexContent = await readGitIndexBlob(repoRealPath, relPath);
-      if (mode === "120000") {
-        const rawTarget = indexContent.replace(/\r?\n$/, "");
-        const resolvedTarget = await resolveInsideRepo(
-          repoRealPath,
-          path.dirname(fullPath),
-          rawTarget,
-          relPath,
-        );
-        if (isForbiddenEnvFile(path.basename(resolvedTarget))) {
-          throw new Error(`forbidden environment file target: ${relPath}`);
+      } else {
+        if (targetStat.isDirectory() && diskLstat.isSymbolicLink()) {
+          const symlinkedFiles = await walkRepoFiles(resolvedPath, repoRealPath, {
+            skipUntrackedBuildDirs: false,
+            relPrefix: relPath,
+            visitedDirs: new Set([repoRealPath, resolvedPath]),
+          });
+          for (const entry of symlinkedFiles) {
+            byRelPath.set(entry.relPath, entry);
+          }
+        }
+        if (mode !== "120000") {
+          const indexContent = await readGitIndexBlob(repoRealPath, relPath);
+          byRelPath.set(`${relPath}#git-index`, {
+            fullPath,
+            resolvedPath: null,
+            relPath,
+            preloadedContent: indexContent,
+            skipMarkdownLinks: true,
+          });
         }
       }
+    } else if (mode !== "120000") {
+      const indexContent = await readGitIndexBlob(repoRealPath, relPath);
       byRelPath.set(relPath, {
         fullPath,
         resolvedPath: null,
@@ -602,6 +701,9 @@ export async function verifyRepository(
         if (rule.regex.test(candidateContent)) {
           throw new Error(`public-safety violation (${rule.name}) in ${relPath}`);
         }
+      }
+      if (hasForbiddenCoordinateToken(candidateContent)) {
+        throw new Error(`public-safety violation (private organization coordinate) in ${relPath}`);
       }
     }
 

@@ -125,7 +125,7 @@ test("minimal valid fixture passes including dot-prefixed in-repo files", async 
   }
 });
 
-test("rejects unquoted shell-expansion corruption in active GrillTrack fields", async () => {
+test("rejects unquoted shell-expansion corruption in active GrillTrack fields while allowing $+/mo rates", async () => {
   for (const corruptedText of [
     "Reconcile with zsh.00 difference lock",
     "Optional /yr user-owned SimpleFIN feed",
@@ -141,9 +141,18 @@ test("rejects unquoted shell-expansion corruption in active GrillTrack fields", 
       await rm(root, { recursive: true, force: true });
     }
   }
+
+  const { root, ledger } = await createMinimalValidFixture();
+  try {
+    ledger.decisions[0].choice = "Replaces $245+/mo closed SaaS and $15k–$50k+/yr enterprise contracts.";
+    await writeFile(path.join(root, ".grilltrack/ledger.json"), JSON.stringify(ledger, null, 2), "utf8");
+    await verifyRepository(root);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
 });
 
-test("rejects broken or escaping Markdown relative links while ignoring fenced code blocks", async () => {
+test("rejects broken or escaping Markdown relative links while ignoring fenced and multi-backtick code spans", async () => {
   const { root } = await createMinimalValidFixture();
   try {
     await writeFile(
@@ -153,12 +162,28 @@ test("rejects broken or escaping Markdown relative links while ignoring fenced c
     );
     await verifyRepository(root);
 
+    // Multi-backtick CommonMark code span containing a single backtick must not swallow subsequent broken links
     await writeFile(
       path.join(root, "docs/CHARTER.md"),
-      "# Charter\n\nSee [Missing](./does-not-exist.md).\n",
+      "# Charter\n\nUse ``foo ` bar`` then [Missing](./does-not-exist.md) and `baz`.\n",
       "utf8",
     );
     await assert.rejects(() => verifyRepository(root), /target does not exist/);
+
+    // Angle-bracket link with unbalanced parens or unclosed '<' must be checked/rejected
+    await writeFile(
+      path.join(root, "docs/CHARTER.md"),
+      "# Charter\n\nSee [Missing](<./missing (1.md>).\n",
+      "utf8",
+    );
+    await assert.rejects(() => verifyRepository(root), /target does not exist/);
+
+    await writeFile(
+      path.join(root, "docs/CHARTER.md"),
+      "# Charter\n\nSee [Unclosed](<./missing.md).\n",
+      "utf8",
+    );
+    await assert.rejects(() => verifyRepository(root), /unclosed angle-bracket link destination/);
 
     await writeFile(
       path.join(root, "docs/CHARTER.md"),
@@ -190,7 +215,7 @@ test("rejects external symlinks and still scans internal symlinks", async () => 
   }
 });
 
-test("rejects public-safety leaks and .env files", async () => {
+test("rejects public-safety leaks, SHA-256 coordinate blocklist tokens without trailing slash, and .env files", async () => {
   const { root } = await createMinimalValidFixture();
   try {
     await writeFile(path.join(root, ".env"), "PLACEHOLDER=1\n", "utf8");
@@ -201,6 +226,10 @@ test("rejects public-safety leaks and .env files", async () => {
     await writeFile(path.join(root, "docs/CHARTER.md"), `# Charter\n\nPath: ${leakedPath}\n`, "utf8");
     await assert.rejects(() => verifyRepository(root), /public-safety violation/);
 
+    const sentinelCoord = "https://github.com/example-private-org-" + "sentinel";
+    await writeFile(path.join(root, "docs/CHARTER.md"), `# Charter\n\nCoord: ${sentinelCoord}\n`, "utf8");
+    await assert.rejects(() => verifyRepository(root), /private organization coordinate/);
+
     await writeFile(path.join(root, "docs/CHARTER.md"), "# Charter\n\nSee [Proof](../proof/PROOF.md).\n", "utf8");
     await mkdir(path.join(root, "dist"), { recursive: true });
     await writeFile(path.join(root, "dist/.ENV"), "PLACEHOLDER=1\n", "utf8");
@@ -210,7 +239,7 @@ test("rejects public-safety leaks and .env files", async () => {
   }
 });
 
-test("scans Git-tracked files inside ignored directories while skipping untracked build outputs", async () => {
+test("scans Git-tracked files, staged type-swapped blobs, and symlinks inside ignored directories", async () => {
   const { execFile: execFileCb } = await import("node:child_process");
   const { promisify } = await import("node:util");
   const execFile = promisify(execFileCb);
@@ -260,6 +289,33 @@ test("scans Git-tracked files inside ignored directories while skipping untracke
     await rm(path.join(root, "dist/staged-only.txt"));
     await assert.rejects(() => verifyRepository(root), /public-safety violation/);
     await execFile("git", ["rm", "--cached", "-q", "dist/staged-only.txt"], { cwd: root });
+
+    // Staged secret replaced on disk by a directory without git add must still fail
+    await writeFile(path.join(root, "docs/type-swapped.txt"), `token=${fakeToken}\n`, "utf8");
+    await execFile("git", ["add", "docs/type-swapped.txt"], { cwd: root });
+    await rm(path.join(root, "docs/type-swapped.txt"));
+    await mkdir(path.join(root, "docs/type-swapped.txt"));
+    await assert.rejects(() => verifyRepository(root), /public-safety violation/);
+    await rm(path.join(root, "docs/type-swapped.txt"), { recursive: true, force: true });
+    await execFile("git", ["rm", "--cached", "-q", "docs/type-swapped.txt"], { cwd: root });
+
+    // Staged external symlink masked on disk by a harmless regular file without git add must still fail
+    await symlink("/etc/passwd", path.join(root, "docs/staged-escape"));
+    await execFile("git", ["add", "docs/staged-escape"], { cwd: root });
+    await rm(path.join(root, "docs/staged-escape"));
+    await writeFile(path.join(root, "docs/staged-escape"), "harmless\n", "utf8");
+    await assert.rejects(() => verifyRepository(root), /escapes repository root/);
+    await rm(path.join(root, "docs/staged-escape"));
+    await execFile("git", ["rm", "--cached", "-q", "docs/staged-escape"], { cwd: root });
+
+    // Force-tracked directory symlink inside dist/ pointing into .grilltrack/work/ must still scan target contents
+    await mkdir(path.join(root, ".grilltrack/work/hidden"), { recursive: true });
+    await writeFile(path.join(root, ".grilltrack/work/hidden/leak.txt"), `token=${fakeToken}\n`, "utf8");
+    await symlink("../.grilltrack/work/hidden", path.join(root, "dist/hidden-link"));
+    await execFile("git", ["add", "-f", "dist/hidden-link"], { cwd: root });
+    await assert.rejects(() => verifyRepository(root), /public-safety violation/);
+    await execFile("git", ["rm", "-f", "-q", "dist/hidden-link"], { cwd: root });
+    await rm(path.join(root, ".grilltrack/work/hidden"), { recursive: true, force: true });
 
     // Clean force-tracked markdown inside dist/ skips relative link check but passes public-safety scan
     await writeFile(path.join(root, "dist/BUILD_NOTES.md"), "Generated output: [Bundle](./missing-bundle.js)\n", "utf8");
