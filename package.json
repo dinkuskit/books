@@ -1,12 +1,19 @@
 {
   "name": "@dinkuskit/books",
   "version": "0.0.0",
-  "description": "Bookkeeping, payout reconciliation, and continuous tax readiness for DinkusKit on EmDash",
+  "description": "The bookkeeping, reconciliation, and tax-readiness ledger for EmDash sites",
   "type": "module",
   "private": true,
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dinkuskit/books.git"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "test": "node --test",
+    "verify": "node ./scripts/verify-repo.mjs"
   }
 }
