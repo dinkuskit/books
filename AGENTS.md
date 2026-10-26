@@ -14,6 +14,15 @@ public.
    the GrillTrack CLI.
 4. Current source, tests, and committed proof.
 
+Read the public [DinkusKit vision](https://github.com/dinkuskit/.github/blob/36aab690a7ef66dc119aab70e258ea979c54841a/VISION.md)
+and [scope and planning](https://github.com/dinkuskit/.github/blob/36aab690a7ef66dc119aab70e258ea979c54841a/ROADMAP.md)
+as product context. They do not replace this repository's six locked decisions
+or make accepted designs active implementation work. For a material product,
+architecture, or verification question, use the canonical
+[selective research guidance](https://github.com/saariuslystoned/SaariusSkills/blob/23f2bb1208b3baa7aedaa87faec00395f9bdd061/skills/emdash-commerce/SKILL.md).
+Routine fixes do not require a new research cycle; a substantive conflict with
+a locked decision must return to its owning decision record.
+
 ## Public-safe boundary
 
 - Never commit credentials, environment files, customer or tenant data,
@@ -41,6 +50,14 @@ public.
   MCP) share one typed service. First-time vendor rules, owner/tax elections,
   statement reconciliation locks, period closes, and external CPA/tax handoffs
   are strictly human-gated.
+- A supplied first-party assistant is optional. Merchant-selected assistants
+  use the same supported interfaces and explicit permissions; first-party
+  assistants receive no hidden authority. Access starts read-only.
+- One accountable operator may direct staff, contractors, and several sites.
+  Business-wide and site-specific knowledge require explicit permissions and
+  authorized overrides; private conversations do not automatically become
+  shared records. Cross-site consolidation and shared knowledge storage are
+  not added to this charter by that direction.
 
 ## Architecture layout
 

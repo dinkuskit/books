@@ -6,6 +6,28 @@ Competitive benchmark pack: [`docs/research/README.md`](research/README.md).
 
 Business-sensitive tenant figures, bank/card identifiers, tax filings, and private operating rationale live outside this repository and are deliberately never committed here.
 
+## Reading this design
+
+The public [DinkusKit vision](https://github.com/dinkuskit/.github/blob/36aab690a7ef66dc119aab70e258ea979c54841a/VISION.md)
+and [scope and planning](https://github.com/dinkuskit/.github/blob/36aab690a7ef66dc119aab70e258ea979c54841a/ROADMAP.md)
+provide context for the six locked decisions below. This is an accepted design,
+not a report of implemented or installed Books capabilities, a release schedule,
+or authorization to start every designed workflow. Implementation slices need
+their own explicit scope and proof.
+
+Standalone adoption and portable CPA export remain the Books contract. An
+optional first-party assistant and a merchant's chosen assistant use the same
+supported interfaces and permissions, starting read-only. A business can have
+several sites and people helping its accountable operator; that does not add
+cross-site consolidation to this design. Shared business/site knowledge and
+authorized site overrides need a separate storage and permission design.
+Private conversations do not automatically become shared business knowledge
+or public research material.
+
+Use [selective research guidance](https://github.com/saariuslystoned/SaariusSkills/blob/23f2bb1208b3baa7aedaa87faec00395f9bdd061/skills/emdash-commerce/SKILL.md)
+for a material unresolved question. Keep research findings, locked decisions,
+and active work distinct; do not rewrite the decision ledger by hand.
+
 ---
 
 ## `d1-deployment-and-data-boundary` — Standalone EmDash Plugin + Open County Tax Engine (locked)

@@ -54,5 +54,8 @@ See [`docs/CHARTER.md`](docs/CHARTER.md) and the
 
 Charter locked (`0.0.0`, `private: true`). Runtime implementation proceeds
 slice-by-slice through GrillTrack on isolated worktrees with tests and proof.
+The capabilities above describe the accepted design; they are not installed
+runtime behavior. The [charter context](docs/CHARTER.md#reading-this-design)
+links the broader product direction without expanding active work.
 
 Under construction, dogfooding in the open. MIT.
