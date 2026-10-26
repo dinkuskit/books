@@ -85,14 +85,21 @@
           "result": "clean",
           "reviewed_at": "2026-10-25T23:17:53+00:00",
           "source_identity": "git:ae26ea22ac348b1a36dacd04257cd9ad7cd09bf0"
+        },
+        {
+          "classifications": [],
+          "ref": "proof/grill-charter-20261025/REVIEW_3.md",
+          "result": "clean",
+          "reviewed_at": "2026-10-26T12:49:10+00:00",
+          "source_identity": "git:6fe7a23679aa09f5983f6fd1644aec6cd53a23a4"
         }
       ],
-      "review_ref": "proof/grill-charter-20261025/REVIEW_2.md",
+      "review_ref": "proof/grill-charter-20261025/REVIEW_3.md",
       "review_result": "clean",
-      "review_source_identity": "git:ae26ea22ac348b1a36dacd04257cd9ad7cd09bf0",
+      "review_source_identity": "git:6fe7a23679aa09f5983f6fd1644aec6cd53a23a4",
       "status": "verified",
       "superseded_by": null,
-      "updated_at": "2026-10-25T23:17:53+00:00",
+      "updated_at": "2026-10-26T12:49:10+00:00",
       "verification_ref": "proof/grill-charter-20261025/PROOF.md"
     },
     {
@@ -225,14 +232,21 @@
           "result": "clean",
           "reviewed_at": "2026-10-25T23:17:53+00:00",
           "source_identity": "git:ae26ea22ac348b1a36dacd04257cd9ad7cd09bf0"
+        },
+        {
+          "classifications": [],
+          "ref": "proof/grill-charter-20261025/REVIEW_3.md",
+          "result": "clean",
+          "reviewed_at": "2026-10-26T12:49:10+00:00",
+          "source_identity": "git:6fe7a23679aa09f5983f6fd1644aec6cd53a23a4"
         }
       ],
-      "review_ref": null,
-      "review_result": null,
-      "review_source_identity": null,
+      "review_ref": "proof/grill-charter-20261025/REVIEW_3.md",
+      "review_result": "clean",
+      "review_source_identity": "git:6fe7a23679aa09f5983f6fd1644aec6cd53a23a4",
       "status": "verified",
       "superseded_by": null,
-      "updated_at": "2026-10-26T12:33:35+00:00",
+      "updated_at": "2026-10-26T12:49:10+00:00",
       "verification_ref": "proof/grill-charter-20261025/PROOF.md"
     },
     {
@@ -309,14 +323,21 @@
           "result": "clean",
           "reviewed_at": "2026-10-25T23:17:53+00:00",
           "source_identity": "git:ae26ea22ac348b1a36dacd04257cd9ad7cd09bf0"
+        },
+        {
+          "classifications": [],
+          "ref": "proof/grill-charter-20261025/REVIEW_3.md",
+          "result": "clean",
+          "reviewed_at": "2026-10-26T12:49:10+00:00",
+          "source_identity": "git:6fe7a23679aa09f5983f6fd1644aec6cd53a23a4"
         }
       ],
-      "review_ref": "proof/grill-charter-20261025/REVIEW_2.md",
+      "review_ref": "proof/grill-charter-20261025/REVIEW_3.md",
       "review_result": "clean",
-      "review_source_identity": "git:ae26ea22ac348b1a36dacd04257cd9ad7cd09bf0",
+      "review_source_identity": "git:6fe7a23679aa09f5983f6fd1644aec6cd53a23a4",
       "status": "verified",
       "superseded_by": null,
-      "updated_at": "2026-10-25T23:17:53+00:00",
+      "updated_at": "2026-10-26T12:49:10+00:00",
       "verification_ref": "proof/grill-charter-20261025/PROOF.md"
     },
     {
@@ -495,14 +516,21 @@
           "result": "clean",
           "reviewed_at": "2026-10-25T23:17:53+00:00",
           "source_identity": "git:ae26ea22ac348b1a36dacd04257cd9ad7cd09bf0"
+        },
+        {
+          "classifications": [],
+          "ref": "proof/grill-charter-20261025/REVIEW_3.md",
+          "result": "clean",
+          "reviewed_at": "2026-10-26T12:49:10+00:00",
+          "source_identity": "git:6fe7a23679aa09f5983f6fd1644aec6cd53a23a4"
         }
       ],
-      "review_ref": null,
-      "review_result": null,
-      "review_source_identity": null,
+      "review_ref": "proof/grill-charter-20261025/REVIEW_3.md",
+      "review_result": "clean",
+      "review_source_identity": "git:6fe7a23679aa09f5983f6fd1644aec6cd53a23a4",
       "status": "verified",
       "superseded_by": null,
-      "updated_at": "2026-10-26T12:33:35+00:00",
+      "updated_at": "2026-10-26T12:49:10+00:00",
       "verification_ref": "proof/grill-charter-20261025/PROOF.md"
     },
     {
@@ -727,14 +755,21 @@
           "result": "findings",
           "reviewed_at": "2026-10-25T23:17:54+00:00",
           "source_identity": "git:ae26ea22ac348b1a36dacd04257cd9ad7cd09bf0"
+        },
+        {
+          "classifications": [],
+          "ref": "proof/grill-charter-20261025/REVIEW_3.md",
+          "result": "clean",
+          "reviewed_at": "2026-10-26T12:49:10+00:00",
+          "source_identity": "git:6fe7a23679aa09f5983f6fd1644aec6cd53a23a4"
         }
       ],
-      "review_ref": null,
-      "review_result": null,
-      "review_source_identity": null,
+      "review_ref": "proof/grill-charter-20261025/REVIEW_3.md",
+      "review_result": "clean",
+      "review_source_identity": "git:6fe7a23679aa09f5983f6fd1644aec6cd53a23a4",
       "status": "verified",
       "superseded_by": null,
-      "updated_at": "2026-10-26T12:33:35+00:00",
+      "updated_at": "2026-10-26T12:49:10+00:00",
       "verification_ref": "proof/grill-charter-20261025/PROOF.md"
     },
     {
@@ -811,14 +846,21 @@
           "result": "clean",
           "reviewed_at": "2026-10-25T23:17:54+00:00",
           "source_identity": "git:ae26ea22ac348b1a36dacd04257cd9ad7cd09bf0"
+        },
+        {
+          "classifications": [],
+          "ref": "proof/grill-charter-20261025/REVIEW_3.md",
+          "result": "clean",
+          "reviewed_at": "2026-10-26T12:49:10+00:00",
+          "source_identity": "git:6fe7a23679aa09f5983f6fd1644aec6cd53a23a4"
         }
       ],
-      "review_ref": "proof/grill-charter-20261025/REVIEW_2.md",
+      "review_ref": "proof/grill-charter-20261025/REVIEW_3.md",
       "review_result": "clean",
-      "review_source_identity": "git:ae26ea22ac348b1a36dacd04257cd9ad7cd09bf0",
+      "review_source_identity": "git:6fe7a23679aa09f5983f6fd1644aec6cd53a23a4",
       "status": "verified",
       "superseded_by": null,
-      "updated_at": "2026-10-25T23:17:54+00:00",
+      "updated_at": "2026-10-26T12:49:10+00:00",
       "verification_ref": "proof/grill-charter-20261025/PROOF.md"
     }
   ],
@@ -840,5 +882,5 @@
   "status": "active",
   "title": "DinkusKit Books \u2014 Charter & Scope",
   "track_id": "gt-20261025142221-8223a4",
-  "updated_at": "2026-10-26T12:33:35+00:00"
+  "updated_at": "2026-10-26T12:49:10+00:00"
 }
