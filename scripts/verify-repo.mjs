@@ -1,0 +1,457 @@
+import { lstat, readdir, readFile, realpath, stat } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const DECISION_STATES = new Set([
+  "proposed",
+  "locked",
+  "implemented",
+  "verified",
+  "reopened",
+  "superseded",
+  "needs_reverification",
+  "deferred",
+]);
+const TRACK_STATES = new Set(["active", "paused", "closed"]);
+const REVIEW_RESULTS = new Set(["clean", "findings"]);
+const REVIEW_CLASSIFICATIONS = new Set([
+  "required_fix",
+  "reject_false_positive",
+  "defer",
+  "human_gate",
+]);
+const ID_RE = /^[a-z0-9][a-z0-9._-]{0,63}$/;
+const SOURCE_IDENTITY_RE = /^(?:git:[0-9a-f]{40}|sha256:[0-9a-f]{64})$/;
+
+const SHELL_CORRUPTION_PATTERNS = [
+  {
+    name: "shell $0 expansion",
+    regex: /\b(?:zsh|bash)(?:\.\d+|\b)/i,
+  },
+  {
+    name: "stripped currency before unit rate",
+    regex: /(?:^|[\s([+])\/(?:yr|mo|person|contractor|return)\b/,
+  },
+  {
+    name: "stripped currency before thousands group",
+    regex: /(?:^|[\s([+]),\d{3}\b/,
+  },
+];
+
+const PUBLIC_SAFETY_PATTERNS = [
+  {
+    name: "PEM private key header",
+    regex: new RegExp("-----BEGIN [A-Z0-9 ]*" + "PRIVATE KEY-----"),
+  },
+  {
+    name: "GitHub token",
+    regex: new RegExp("\\b(?:gh[pousr]_[A-Za-z0-9_]{20,}|github_" + "pat_[A-Za-z0-9_]{20,})\\b"),
+  },
+  {
+    name: "API secret key",
+    regex: new RegExp(
+      "\\b(?:sk-(?:live|test|proj|ant)-[A-Za-z0-9_-]{16,}|(?:sk|rk)_(?:live|test)_[A-Za-z0-9]{12,}|wh" +
+        "sec_[A-Za-z0-9]{16,}|xox[baprs]-[A-Za-z0-9-]{16,}|AK" +
+        "IA[0-9A-Z]{16})\\b",
+    ),
+  },
+  {
+    name: "local workstation user path",
+    regex: new RegExp("(?:^|[^A-Za-z0-9])" + "/Users" + "/[A-Za-z0-9._-]+"),
+  },
+  {
+    name: "private organization coordinate",
+    regex: new RegExp("\\b" + "saari" + "-co/|\\b" + "bobby" + "bones\\b", "i"),
+  },
+];
+
+const IGNORED_DIRS = new Set([".git", "node_modules", "dist", ".astro", "coverage"]);
+
+function isWithinRoot(candidatePath, rootPath) {
+  const rel = path.relative(rootPath, candidatePath);
+  return (
+    rel === "" ||
+    (rel !== ".." && !rel.startsWith(`..${path.sep}`) && !path.isAbsolute(rel))
+  );
+}
+
+async function resolveInsideRepo(repoRealPath, baseDir, rawTarget, contextLabel) {
+  const candidate = path.resolve(baseDir, rawTarget);
+  if (!isWithinRoot(candidate, repoRealPath)) {
+    throw new Error(`${contextLabel}: path escapes repository root: ${rawTarget}`);
+  }
+  let targetReal;
+  try {
+    targetReal = await realpath(candidate);
+  } catch {
+    throw new Error(`${contextLabel}: target does not exist: ${rawTarget}`);
+  }
+  if (!isWithinRoot(targetReal, repoRealPath)) {
+    throw new Error(`${contextLabel}: symlink escapes repository root: ${rawTarget}`);
+  }
+  return targetReal;
+}
+
+function stripFencesAndInlineCode(markdown) {
+  const lines = markdown.split(/\r?\n/);
+  const kept = [];
+  let fenceMarker = null;
+
+  for (const line of lines) {
+    const trimmed = line.trimStart();
+    const fenceMatch = trimmed.match(/^(`{3,}|~{3,})/);
+    if (fenceMatch) {
+      const marker = fenceMatch[1];
+      if (!fenceMarker) {
+        fenceMarker = marker;
+        kept.push("");
+        continue;
+      }
+      if (marker[0] === fenceMarker[0] && marker.length >= fenceMarker.length) {
+        fenceMarker = null;
+        kept.push("");
+        continue;
+      }
+    }
+    if (fenceMarker) {
+      kept.push("");
+      continue;
+    }
+    kept.push(line.replace(/`+[^`]*`+/g, ""));
+  }
+  return kept.join("\n");
+}
+
+function normalizeLinkDestination(rawSpec) {
+  let raw = rawSpec.trim();
+  if (!raw) return null;
+  if (raw.startsWith("<")) {
+    const closeIdx = raw.indexOf(">");
+    if (closeIdx > 0) {
+      raw = raw.slice(1, closeIdx).trim();
+    }
+  } else {
+    const spaceIdx = raw.search(/\s/);
+    if (spaceIdx > 0) {
+      raw = raw.slice(0, spaceIdx);
+    }
+  }
+  if (
+    !raw ||
+    raw.startsWith("#") ||
+    /^(?:https?:|mailto:|tel:|data:)/i.test(raw)
+  ) {
+    return null;
+  }
+  return raw;
+}
+
+function extractMarkdownLinks(markdown) {
+  const scrubbed = stripFencesAndInlineCode(markdown);
+  const results = [];
+  const inlineLinkRe = /!?\[[^\]]*\]\(((?:\([^()]*\)|[^()])+)\)/g;
+  for (const match of scrubbed.matchAll(inlineLinkRe)) {
+    const normalized = normalizeLinkDestination(match[1]);
+    if (normalized) results.push(normalized);
+  }
+  const refDefRe = /^\s{0,3}\[[^\]]+\]:\s*(.+)$/gm;
+  for (const match of scrubbed.matchAll(refDefRe)) {
+    const normalized = normalizeLinkDestination(match[1]);
+    if (normalized) results.push(normalized);
+  }
+  return results;
+}
+
+async function walkRepoFiles(
+  dirPath,
+  repoRealPath,
+  relPrefix = "",
+  visitedDirs = new Set([repoRealPath]),
+) {
+  const entries = await readdir(dirPath, { withFileTypes: true });
+  entries.sort((a, b) => a.name.localeCompare(b.name));
+  const files = [];
+
+  for (const entry of entries) {
+    const relPath = relPrefix ? `${relPrefix}/${entry.name}` : entry.name;
+    if (IGNORED_DIRS.has(entry.name)) continue;
+    if (relPath === ".grilltrack/work") continue;
+
+    const fullPath = path.join(dirPath, entry.name);
+    const lst = await lstat(fullPath);
+    let effectiveStat = lst;
+    let effectiveRealDir = null;
+
+    if (lst.isSymbolicLink()) {
+      const targetReal = await resolveInsideRepo(repoRealPath, dirPath, entry.name, relPath);
+      effectiveStat = await stat(targetReal);
+      if (effectiveStat.isDirectory()) {
+        effectiveRealDir = targetReal;
+      }
+    } else if (lst.isDirectory()) {
+      effectiveRealDir = await realpath(fullPath);
+    }
+
+    if (effectiveStat.isDirectory()) {
+      if (effectiveRealDir && visitedDirs.has(effectiveRealDir)) {
+        continue;
+      }
+      const nextVisited = new Set(visitedDirs);
+      if (effectiveRealDir) nextVisited.add(effectiveRealDir);
+      files.push(...(await walkRepoFiles(fullPath, repoRealPath, relPath, nextVisited)));
+    } else if (effectiveStat.isFile()) {
+      files.push({ fullPath, relPath });
+    }
+  }
+  return files;
+}
+
+function assertCleanProjectionText(value, fieldLabel) {
+  if (typeof value !== "string") return;
+  for (const pattern of SHELL_CORRUPTION_PATTERNS) {
+    if (pattern.regex.test(value)) {
+      throw new Error(
+        `GrillTrack ${fieldLabel} contains suspected shell-expansion corruption (${pattern.name}): ${JSON.stringify(value)}`,
+      );
+    }
+  }
+}
+
+async function verifyPackageManifest(repoRealPath) {
+  const pkgPath = await resolveInsideRepo(repoRealPath, repoRealPath, "package.json", "package.json");
+  const pkg = JSON.parse(await readFile(pkgPath, "utf8"));
+  if (pkg.name !== "@dinkuskit/books") {
+    throw new Error(`package.json name must be "@dinkuskit/books", got ${JSON.stringify(pkg.name)}`);
+  }
+  if (pkg.type !== "module") {
+    throw new Error('package.json type must be "module"');
+  }
+  if (pkg.license !== "MIT") {
+    throw new Error('package.json license must be "MIT"');
+  }
+  if (pkg.version === "0.0.0" && pkg.private !== true) {
+    throw new Error('package.json must stay "private": true while at charter version 0.0.0');
+  }
+}
+
+async function verifyGrillTrack(repoRealPath) {
+  const ledgerPath = await resolveInsideRepo(
+    repoRealPath,
+    repoRealPath,
+    ".grilltrack/ledger.json",
+    ".grilltrack/ledger.json",
+  );
+  const eventsPath = await resolveInsideRepo(
+    repoRealPath,
+    repoRealPath,
+    ".grilltrack/events.jsonl",
+    ".grilltrack/events.jsonl",
+  );
+
+  const ledger = JSON.parse(await readFile(ledgerPath, "utf8"));
+  if (ledger.schema_version !== "grilltrack/v0.1") {
+    throw new Error(`unexpected GrillTrack schema_version: ${ledger.schema_version}`);
+  }
+  if (typeof ledger.track_id !== "string" || !ID_RE.test(ledger.track_id)) {
+    throw new Error(`invalid GrillTrack track_id: ${ledger.track_id}`);
+  }
+  if (!TRACK_STATES.has(ledger.status)) {
+    throw new Error(`invalid GrillTrack status: ${ledger.status}`);
+  }
+
+  assertCleanProjectionText(ledger.title, "title");
+  if (ledger.current_focus && typeof ledger.current_focus === "object") {
+    assertCleanProjectionText(ledger.current_focus.summary, "current_focus.summary");
+  }
+  if (ledger.recommendation && typeof ledger.recommendation === "object") {
+    assertCleanProjectionText(ledger.recommendation.recommended, "recommendation.recommended");
+    assertCleanProjectionText(ledger.recommendation.reason, "recommendation.reason");
+    for (const [idx, alt] of (ledger.recommendation.alternatives ?? []).entries()) {
+      assertCleanProjectionText(alt, `recommendation.alternatives[${idx}]`);
+    }
+  }
+
+  if (!Array.isArray(ledger.decisions) || ledger.decisions.length === 0) {
+    throw new Error("GrillTrack ledger must contain at least one decision");
+  }
+
+  const seenIds = new Set();
+  for (const decision of ledger.decisions) {
+    if (!decision || typeof decision !== "object" || !ID_RE.test(decision.id ?? "")) {
+      throw new Error(`invalid GrillTrack decision id: ${JSON.stringify(decision?.id)}`);
+    }
+    if (seenIds.has(decision.id)) {
+      throw new Error(`duplicate GrillTrack decision id: ${decision.id}`);
+    }
+    seenIds.add(decision.id);
+
+    if (!DECISION_STATES.has(decision.status)) {
+      throw new Error(`invalid status on ${decision.id}: ${decision.status}`);
+    }
+    if (decision.status === "verified" && decision.repair_required === true) {
+      throw new Error(`${decision.id} cannot be verified while repair_required is true`);
+    }
+
+    if (decision.status !== "superseded") {
+      assertCleanProjectionText(decision.question, `${decision.id}.question`);
+      assertCleanProjectionText(decision.choice, `${decision.id}.choice`);
+      assertCleanProjectionText(decision.rationale, `${decision.id}.rationale`);
+    }
+
+    for (const refField of [
+      "context_ref",
+      "baseline_ref",
+      "implementation_ref",
+      "verification_ref",
+      "review_ref",
+    ]) {
+      const refValue = decision[refField];
+      if (refValue === null || refValue === undefined) {
+        if (
+          (refField === "implementation_ref" &&
+            (decision.status === "implemented" || decision.status === "verified")) ||
+          (refField === "verification_ref" && decision.status === "verified")
+        ) {
+          throw new Error(`${decision.id}.${refField} is required when status is ${decision.status}`);
+        }
+        continue;
+      }
+      if (typeof refValue !== "string" || !refValue.trim()) {
+        throw new Error(`${decision.id}.${refField} must be a non-empty string`);
+      }
+      const normalizedRef = refValue.startsWith("file:")
+        ? refValue.slice("file:".length)
+        : refValue;
+      await resolveInsideRepo(repoRealPath, repoRealPath, normalizedRef, `${decision.id}.${refField}`);
+    }
+
+    const hasAnyReviewField =
+      decision.review_ref !== null ||
+      decision.review_source_identity !== null ||
+      decision.review_result !== null;
+    if (hasAnyReviewField) {
+      if (
+        typeof decision.review_ref !== "string" ||
+        !decision.review_ref.trim() ||
+        typeof decision.review_source_identity !== "string" ||
+        !SOURCE_IDENTITY_RE.test(decision.review_source_identity) ||
+        !REVIEW_RESULTS.has(decision.review_result)
+      ) {
+        throw new Error(`${decision.id} has incomplete or invalid review metadata`);
+      }
+      const classifications = decision.review_classifications ?? [];
+      if (
+        !Array.isArray(classifications) ||
+        classifications.some((item) => !REVIEW_CLASSIFICATIONS.has(item))
+      ) {
+        throw new Error(`${decision.id}.review_classifications contains invalid values`);
+      }
+      if (decision.review_result === "clean" && classifications.length > 0) {
+        throw new Error(`${decision.id} clean review cannot carry classifications`);
+      }
+      if (decision.review_result === "findings" && classifications.length === 0) {
+        throw new Error(`${decision.id} findings review requires classifications`);
+      }
+    }
+  }
+
+  for (const decision of ledger.decisions) {
+    if (!Array.isArray(decision.dependencies)) {
+      throw new Error(`${decision.id}.dependencies must be an array`);
+    }
+    for (const depId of decision.dependencies) {
+      if (!seenIds.has(depId) || depId === decision.id) {
+        throw new Error(`${decision.id} has invalid dependency: ${depId}`);
+      }
+    }
+  }
+
+  const eventsRaw = await readFile(eventsPath, "utf8");
+  const eventLines = eventsRaw.split(/\r?\n/).filter((line) => line.trim().length > 0);
+  if (eventLines.length === 0) {
+    throw new Error(".grilltrack/events.jsonl must not be empty");
+  }
+  for (const [index, line] of eventLines.entries()) {
+    const parsed = JSON.parse(line);
+    if (
+      !parsed ||
+      typeof parsed !== "object" ||
+      typeof parsed.event_id !== "string" ||
+      typeof parsed.at !== "string" ||
+      typeof parsed.action !== "string" ||
+      !parsed.data ||
+      typeof parsed.data !== "object"
+    ) {
+      throw new Error(`.grilltrack/events.jsonl line ${index + 1} is malformed`);
+    }
+  }
+
+  return { decisions: ledger.decisions.length, events: eventLines.length };
+}
+
+export async function verifyRepository(
+  repoDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."),
+) {
+  const repoRealPath = await realpath(repoDir);
+  await verifyPackageManifest(repoRealPath);
+  const grilltrackStats = await verifyGrillTrack(repoRealPath);
+
+  const files = await walkRepoFiles(repoRealPath, repoRealPath);
+  let checkedLinks = 0;
+
+  for (const { fullPath, relPath } of files) {
+    const baseName = path.basename(relPath);
+    if ((baseName === ".env" || baseName.startsWith(".env.")) && baseName !== ".env.example") {
+      throw new Error(`forbidden environment file present: ${relPath}`);
+    }
+
+    const content = await readFile(fullPath, "utf8");
+    for (const rule of PUBLIC_SAFETY_PATTERNS) {
+      if (rule.regex.test(content)) {
+        throw new Error(`public-safety violation (${rule.name}) in ${relPath}`);
+      }
+    }
+
+    if (relPath.endsWith(".md")) {
+      const links = extractMarkdownLinks(content);
+      const mdDir = path.dirname(fullPath);
+      for (const rawLink of links) {
+        const withoutFragment = rawLink.split("#")[0].split("?")[0];
+        if (!withoutFragment) continue;
+        let decodedPath;
+        try {
+          decodedPath = decodeURIComponent(withoutFragment);
+        } catch {
+          throw new Error(`malformed URI in ${relPath}: ${rawLink}`);
+        }
+        await resolveInsideRepo(repoRealPath, mdDir, decodedPath, `${relPath} -> ${rawLink}`);
+        checkedLinks += 1;
+      }
+    }
+  }
+
+  return {
+    filesChecked: files.length,
+    markdownLinksChecked: checkedLinks,
+    decisionsChecked: grilltrackStats.decisions,
+    eventsChecked: grilltrackStats.events,
+  };
+}
+
+async function safeRealpath(target) {
+  if (!target) return null;
+  try {
+    return await realpath(target);
+  } catch {
+    return null;
+  }
+}
+
+const entryReal = await safeRealpath(process.argv[1]);
+const moduleReal = await safeRealpath(fileURLToPath(import.meta.url));
+if (entryReal && moduleReal && entryReal === moduleReal) {
+  const summary = await verifyRepository();
+  console.log(
+    `verified @dinkuskit/books (${summary.filesChecked} files, ${summary.markdownLinksChecked} links, ${summary.decisionsChecked} GrillTrack decisions)`,
+  );
+}

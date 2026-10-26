@@ -4,11 +4,11 @@
   "current_focus": {
     "cadence": "frontier-batch",
     "confirmed": true,
-    "confirmed_at": "2026-10-25T15:06:58+00:00",
+    "confirmed_at": "2026-10-26T12:33:34+00:00",
     "domain": "charter-and-scope",
-    "started_at": "2026-10-25T14:36:53+00:00",
+    "started_at": "2026-10-26T12:33:34+00:00",
     "status": "inspected",
-    "summary": "Owner confirmed Cycle 1 Charter & Scope (D1-D6): standalone EmDash plugin with optional Commerce/Ship/Payments adapters + standalone open-source US County/State sales-tax schedule package; multi-processor clearing (Stripe net payouts + Authorize.Net gross batches + future providers) & free CSV/OFX + /yr user-direct SimpleFIN; simple Cash | Accrual toggle (defer Inventory sync); Safe-to-Spend 3-bucket header + processor-independent SST/Census county sales-tax workbooks + quarterly income-tax pacer with CPA-first handoff default; built-in Gusto payroll bridge + free native 1099 tracking (reject native W-2 withholding); and human-gated locks/CPA handoffs alongside agent staging."
+    "summary": "Owner confirmed Cycle 1 Charter & Scope (D1-D6): standalone EmDash plugin with optional Commerce/Ship/Payments adapters + standalone open-source US County/State sales-tax schedule package; multi-processor clearing (Stripe net payouts + Authorize.Net gross batches + future providers) & free CSV/OFX + $15/yr user-direct SimpleFIN; simple Cash | Accrual toggle (defer Inventory sync); Safe-to-Spend 3-bucket header + processor-independent SST/Census county sales-tax workbooks + quarterly income-tax pacer with CPA-first handoff default; built-in Gusto payroll bridge + free native 1099 tracking (reject native W-2 withholding); and human-gated locks/CPA handoffs alongside agent staging."
   },
   "decisions": [
     {
@@ -98,7 +98,7 @@
     {
       "baseline_ref": "docs/research/07-found-relay-puzzle.md",
       "candidate_refs": [],
-      "choice": "Free CSV/OFX/QFX statement imports + direct read-only processor/bank keys + optional /yr user-owned SimpleFIN Bridge token (zsh vendor billing/markup) feeding a dual-balance (Statement vs Ledger) reconciliation engine (zsh.00-diff lock + non-destructive Remove & Redo) and multi-processor settlement clearing supporting both net-fee payouts (Stripe payout_id) and gross batch settlements + separate acquirer fee debits (Authorize.Net batchId and future @dinkuskit/payments providers).",
+      "choice": "Free CSV/OFX/QFX statement imports + direct read-only processor/bank keys + optional $15/yr user-owned SimpleFIN Bridge token ($0 vendor billing/markup) feeding a dual-balance (Statement vs Ledger) reconciliation engine ($0.00-diff lock + non-destructive Remove & Redo) and multi-processor settlement clearing supporting both net-fee payouts (Stripe payout_id) and gross batch settlements + separate acquirer fee debits (Authorize.Net batchId and future @dinkuskit/payments providers).",
       "context_ref": "docs/research/01-xero.md",
       "created_at": "2026-10-25T14:36:53+00:00",
       "deferred_reason": null,
@@ -147,6 +147,62 @@
           "review_source_identity": null,
           "to": "verified",
           "verification_ref": null
+        },
+        {
+          "at": "2026-10-26T12:33:33+00:00",
+          "choice": "Free CSV/OFX/QFX statement imports + direct read-only processor/bank keys + optional /yr user-owned SimpleFIN Bridge token (zsh vendor billing/markup) feeding a dual-balance (Statement vs Ledger) reconciliation engine (zsh.00-diff lock + non-destructive Remove & Redo) and multi-processor settlement clearing supporting both net-fee payouts (Stripe payout_id) and gross batch settlements + separate acquirer fee debits (Authorize.Net batchId and future @dinkuskit/payments providers).",
+          "from": "verified",
+          "implementation_ref": "docs/CHARTER.md",
+          "note": "Restore unquoted shell-expanded currency tokens ($15/yr, $0, $0.00) in ledger projection",
+          "repair_required": false,
+          "review_classifications": [],
+          "review_ref": "proof/grill-charter-20261025/REVIEW_2.md",
+          "review_result": "clean",
+          "review_source_identity": "git:ae26ea22ac348b1a36dacd04257cd9ad7cd09bf0",
+          "to": "reopened",
+          "verification_ref": "proof/grill-charter-20261025/PROOF.md"
+        },
+        {
+          "at": "2026-10-26T12:33:34+00:00",
+          "choice": "Free CSV/OFX/QFX statement imports + direct read-only processor/bank keys + optional /yr user-owned SimpleFIN Bridge token (zsh vendor billing/markup) feeding a dual-balance (Statement vs Ledger) reconciliation engine (zsh.00-diff lock + non-destructive Remove & Redo) and multi-processor settlement clearing supporting both net-fee payouts (Stripe payout_id) and gross batch settlements + separate acquirer fee debits (Authorize.Net batchId and future @dinkuskit/payments providers).",
+          "from": "reopened",
+          "implementation_ref": "docs/CHARTER.md",
+          "note": "user accepted the scoped decision",
+          "repair_required": false,
+          "review_classifications": [],
+          "review_ref": "proof/grill-charter-20261025/REVIEW_2.md",
+          "review_result": "clean",
+          "review_source_identity": "git:ae26ea22ac348b1a36dacd04257cd9ad7cd09bf0",
+          "to": "locked",
+          "verification_ref": "proof/grill-charter-20261025/PROOF.md"
+        },
+        {
+          "at": "2026-10-26T12:33:34+00:00",
+          "choice": "Free CSV/OFX/QFX statement imports + direct read-only processor/bank keys + optional $15/yr user-owned SimpleFIN Bridge token ($0 vendor billing/markup) feeding a dual-balance (Statement vs Ledger) reconciliation engine ($0.00-diff lock + non-destructive Remove & Redo) and multi-processor settlement clearing supporting both net-fee payouts (Stripe payout_id) and gross batch settlements + separate acquirer fee debits (Authorize.Net batchId and future @dinkuskit/payments providers).",
+          "from": "locked",
+          "implementation_ref": "docs/CHARTER.md",
+          "note": "bounded implementation recorded",
+          "repair_required": false,
+          "review_classifications": [],
+          "review_ref": "proof/grill-charter-20261025/REVIEW_2.md",
+          "review_result": "clean",
+          "review_source_identity": "git:ae26ea22ac348b1a36dacd04257cd9ad7cd09bf0",
+          "to": "implemented",
+          "verification_ref": "proof/grill-charter-20261025/PROOF.md"
+        },
+        {
+          "at": "2026-10-26T12:33:35+00:00",
+          "choice": "Free CSV/OFX/QFX statement imports + direct read-only processor/bank keys + optional $15/yr user-owned SimpleFIN Bridge token ($0 vendor billing/markup) feeding a dual-balance (Statement vs Ledger) reconciliation engine ($0.00-diff lock + non-destructive Remove & Redo) and multi-processor settlement clearing supporting both net-fee payouts (Stripe payout_id) and gross batch settlements + separate acquirer fee debits (Authorize.Net batchId and future @dinkuskit/payments providers).",
+          "from": "implemented",
+          "implementation_ref": "docs/CHARTER.md",
+          "note": "verification recorded in cumulative context",
+          "repair_required": false,
+          "review_classifications": [],
+          "review_ref": null,
+          "review_result": null,
+          "review_source_identity": null,
+          "to": "verified",
+          "verification_ref": "proof/grill-charter-20261025/PROOF.md"
         }
       ],
       "id": "d2-bank-feeds-and-reconciliation",
@@ -171,12 +227,12 @@
           "source_identity": "git:ae26ea22ac348b1a36dacd04257cd9ad7cd09bf0"
         }
       ],
-      "review_ref": "proof/grill-charter-20261025/REVIEW_2.md",
-      "review_result": "clean",
-      "review_source_identity": "git:ae26ea22ac348b1a36dacd04257cd9ad7cd09bf0",
+      "review_ref": null,
+      "review_result": null,
+      "review_source_identity": null,
       "status": "verified",
       "superseded_by": null,
-      "updated_at": "2026-10-25T23:17:53+00:00",
+      "updated_at": "2026-10-26T12:33:35+00:00",
       "verification_ref": "proof/grill-charter-20261025/PROOF.md"
     },
     {
@@ -359,12 +415,68 @@
           "review_source_identity": null,
           "to": "verified",
           "verification_ref": "proof/grill-charter-20261025/PROOF.md"
+        },
+        {
+          "at": "2026-10-26T12:33:33+00:00",
+          "choice": "Leave checkout tax rate calculation outside Books; own post-checkout tax readiness across three pieces: (1) Three-Bucket 'Safe to Spend' cash header (Sales Tax Owed | Income Tax Set-Aside | Safe to Spend), (2) Processor-independent US County & Local District resolution (via free official SST boundary/rate CSVs, US Census batch geocoder, and state DOR GIS packs\u2014working identically for Stripe, Authorize.Net, and CSV imports) producing CPA-ready monthly .xlsx/.csv County Sales Tax Workbooks, and (3) Rolling quarterly Federal + State income-tax set-aside pacer (Apr 15 / Jun 15 / Sep 15 / Jan 15). Default output is CPA-first handoff (with optional self-filing from the same verified workbook); defer 50-state nexus threshold alarms and resale-certificate vaults beyond V1.",
+          "from": "verified",
+          "implementation_ref": "docs/CHARTER.md",
+          "note": "Restore unquoted shell-expanded currency token ($0) in ledger rationale",
+          "repair_required": false,
+          "review_classifications": [],
+          "review_ref": "proof/grill-charter-20261025/REVIEW_2.md",
+          "review_result": "clean",
+          "review_source_identity": "git:ae26ea22ac348b1a36dacd04257cd9ad7cd09bf0",
+          "to": "reopened",
+          "verification_ref": "proof/grill-charter-20261025/PROOF.md"
+        },
+        {
+          "at": "2026-10-26T12:33:34+00:00",
+          "choice": "Leave checkout tax rate calculation outside Books; own post-checkout tax readiness across three pieces: (1) Three-Bucket 'Safe to Spend' cash header (Sales Tax Owed | Income Tax Set-Aside | Safe to Spend), (2) Processor-independent US County & Local District resolution (via free official SST boundary/rate CSVs, US Census batch geocoder, and state DOR GIS packs\u2014working identically for Stripe, Authorize.Net, and CSV imports) producing CPA-ready monthly .xlsx/.csv County Sales Tax Workbooks, and (3) Rolling quarterly Federal + State income-tax set-aside pacer (Apr 15 / Jun 15 / Sep 15 / Jan 15). Default output is CPA-first handoff (with optional self-filing from the same verified workbook); defer 50-state nexus threshold alarms and resale-certificate vaults beyond V1.",
+          "from": "reopened",
+          "implementation_ref": "docs/CHARTER.md",
+          "note": "user accepted the scoped decision",
+          "repair_required": false,
+          "review_classifications": [],
+          "review_ref": "proof/grill-charter-20261025/REVIEW_2.md",
+          "review_result": "clean",
+          "review_source_identity": "git:ae26ea22ac348b1a36dacd04257cd9ad7cd09bf0",
+          "to": "locked",
+          "verification_ref": "proof/grill-charter-20261025/PROOF.md"
+        },
+        {
+          "at": "2026-10-26T12:33:35+00:00",
+          "choice": "Leave checkout tax rate calculation outside Books; own post-checkout tax readiness across three pieces: (1) Three-Bucket 'Safe to Spend' cash header (Sales Tax Owed | Income Tax Set-Aside | Safe to Spend), (2) Processor-independent US County & Local District resolution (via free official SST boundary/rate CSVs, US Census batch geocoder, and state DOR GIS packs\u2014working identically for Stripe, Authorize.Net, and CSV imports) producing CPA-ready monthly .xlsx/.csv County Sales Tax Workbooks, and (3) Rolling quarterly Federal + State income-tax set-aside pacer (Apr 15 / Jun 15 / Sep 15 / Jan 15). Default output is CPA-first handoff (with optional self-filing from the same verified workbook); defer 50-state nexus threshold alarms and resale-certificate vaults beyond V1.",
+          "from": "locked",
+          "implementation_ref": "docs/CHARTER.md",
+          "note": "bounded implementation recorded",
+          "repair_required": false,
+          "review_classifications": [],
+          "review_ref": "proof/grill-charter-20261025/REVIEW_2.md",
+          "review_result": "clean",
+          "review_source_identity": "git:ae26ea22ac348b1a36dacd04257cd9ad7cd09bf0",
+          "to": "implemented",
+          "verification_ref": "proof/grill-charter-20261025/PROOF.md"
+        },
+        {
+          "at": "2026-10-26T12:33:35+00:00",
+          "choice": "Leave checkout tax rate calculation outside Books; own post-checkout tax readiness across three pieces: (1) Three-Bucket 'Safe to Spend' cash header (Sales Tax Owed | Income Tax Set-Aside | Safe to Spend), (2) Processor-independent US County & Local District resolution (via free official SST boundary/rate CSVs, US Census batch geocoder, and state DOR GIS packs\u2014working identically for Stripe, Authorize.Net, and CSV imports) producing CPA-ready monthly .xlsx/.csv County Sales Tax Workbooks, and (3) Rolling quarterly Federal + State income-tax set-aside pacer (Apr 15 / Jun 15 / Sep 15 / Jan 15). Default output is CPA-first handoff (with optional self-filing from the same verified workbook); defer 50-state nexus threshold alarms and resale-certificate vaults beyond V1.",
+          "from": "implemented",
+          "implementation_ref": "docs/CHARTER.md",
+          "note": "verification recorded in cumulative context",
+          "repair_required": false,
+          "review_classifications": [],
+          "review_ref": null,
+          "review_result": null,
+          "review_source_identity": null,
+          "to": "verified",
+          "verification_ref": "proof/grill-charter-20261025/PROOF.md"
         }
       ],
       "id": "d4-continuous-tax-engine",
       "implementation_ref": "docs/CHARTER.md",
       "question": "What sales-tax and federal/state income-tax scope belongs in @dinkuskit/books V1?",
-      "rationale": "Eliminates monthly county sales-tax spreadsheet pain for zsh across any payment gateway, ends Q4 tax surprises, and keeps the merchant's CPA as the filing shield between the business and tax authorities.",
+      "rationale": "Eliminates monthly county sales-tax spreadsheet pain for $0 across any payment gateway, ends Q4 tax surprises, and keeps the merchant's CPA as the filing shield between the business and tax authorities.",
       "repair_required": false,
       "review_classifications": [],
       "review_history": [
@@ -385,18 +497,18 @@
           "source_identity": "git:ae26ea22ac348b1a36dacd04257cd9ad7cd09bf0"
         }
       ],
-      "review_ref": "proof/grill-charter-20261025/REVIEW_2.md",
-      "review_result": "clean",
-      "review_source_identity": "git:ae26ea22ac348b1a36dacd04257cd9ad7cd09bf0",
+      "review_ref": null,
+      "review_result": null,
+      "review_source_identity": null,
       "status": "verified",
       "superseded_by": null,
-      "updated_at": "2026-10-25T23:17:53+00:00",
+      "updated_at": "2026-10-26T12:33:35+00:00",
       "verification_ref": "proof/grill-charter-20261025/PROOF.md"
     },
     {
       "baseline_ref": null,
       "candidate_refs": [],
-      "choice": "Built-in Gusto Payroll Connector inside @dinkuskit/books (using customer-facing gusto-mcp / gusto-cli OAuth + GL CSV drops for pre-payday Safe-to-Spend checks and zsh.00 clearing reconciliation of GUSTO NET / GUSTO TAX debits) + native free 1099-NEC/1099-MISC contractor tracking and IRS IRIS CSV export; hard-reject native W-2 payroll calculation/impounding.",
+      "choice": "Built-in Gusto Payroll Connector inside @dinkuskit/books (using customer-facing gusto-mcp / gusto-cli OAuth + GL CSV drops for pre-payday Safe-to-Spend checks and $0.00 clearing reconciliation of GUSTO NET / GUSTO TAX debits) + native free 1099-NEC/1099-MISC contractor tracking (category-specific corporate-exemption overrides, form/box/tax-year thresholds, card/1099-K exclusion, and IRS IRIS CSV export); hard-reject native W-2 payroll calculation/impounding.",
       "context_ref": "docs/research/05-gusto-payroll-1099.md",
       "created_at": "2026-10-25T14:36:53+00:00",
       "deferred_reason": null,
@@ -533,12 +645,68 @@
           "review_source_identity": null,
           "to": "verified",
           "verification_ref": "proof/grill-charter-20261025/PROOF.md"
+        },
+        {
+          "at": "2026-10-26T12:33:33+00:00",
+          "choice": "Built-in Gusto Payroll Connector inside @dinkuskit/books (using customer-facing gusto-mcp / gusto-cli OAuth + GL CSV drops for pre-payday Safe-to-Spend checks and zsh.00 clearing reconciliation of GUSTO NET / GUSTO TAX debits) + native free 1099-NEC/1099-MISC contractor tracking and IRS IRIS CSV export; hard-reject native W-2 payroll calculation/impounding.",
+          "from": "verified",
+          "implementation_ref": "docs/CHARTER.md",
+          "note": "Restore unquoted shell-expanded currency tokens ($0.00, $35/mo + $6/contractor) and sync 1099 charter refinements",
+          "repair_required": false,
+          "review_classifications": [],
+          "review_ref": null,
+          "review_result": null,
+          "review_source_identity": null,
+          "to": "reopened",
+          "verification_ref": "proof/grill-charter-20261025/PROOF.md"
+        },
+        {
+          "at": "2026-10-26T12:33:34+00:00",
+          "choice": "Built-in Gusto Payroll Connector inside @dinkuskit/books (using customer-facing gusto-mcp / gusto-cli OAuth + GL CSV drops for pre-payday Safe-to-Spend checks and zsh.00 clearing reconciliation of GUSTO NET / GUSTO TAX debits) + native free 1099-NEC/1099-MISC contractor tracking and IRS IRIS CSV export; hard-reject native W-2 payroll calculation/impounding.",
+          "from": "reopened",
+          "implementation_ref": "docs/CHARTER.md",
+          "note": "user accepted the scoped decision",
+          "repair_required": false,
+          "review_classifications": [],
+          "review_ref": null,
+          "review_result": null,
+          "review_source_identity": null,
+          "to": "locked",
+          "verification_ref": "proof/grill-charter-20261025/PROOF.md"
+        },
+        {
+          "at": "2026-10-26T12:33:35+00:00",
+          "choice": "Built-in Gusto Payroll Connector inside @dinkuskit/books (using customer-facing gusto-mcp / gusto-cli OAuth + GL CSV drops for pre-payday Safe-to-Spend checks and $0.00 clearing reconciliation of GUSTO NET / GUSTO TAX debits) + native free 1099-NEC/1099-MISC contractor tracking (category-specific corporate-exemption overrides, form/box/tax-year thresholds, card/1099-K exclusion, and IRS IRIS CSV export); hard-reject native W-2 payroll calculation/impounding.",
+          "from": "locked",
+          "implementation_ref": "docs/CHARTER.md",
+          "note": "bounded implementation recorded",
+          "repair_required": false,
+          "review_classifications": [],
+          "review_ref": null,
+          "review_result": null,
+          "review_source_identity": null,
+          "to": "implemented",
+          "verification_ref": "proof/grill-charter-20261025/PROOF.md"
+        },
+        {
+          "at": "2026-10-26T12:33:35+00:00",
+          "choice": "Built-in Gusto Payroll Connector inside @dinkuskit/books (using customer-facing gusto-mcp / gusto-cli OAuth + GL CSV drops for pre-payday Safe-to-Spend checks and $0.00 clearing reconciliation of GUSTO NET / GUSTO TAX debits) + native free 1099-NEC/1099-MISC contractor tracking (category-specific corporate-exemption overrides, form/box/tax-year thresholds, card/1099-K exclusion, and IRS IRIS CSV export); hard-reject native W-2 payroll calculation/impounding.",
+          "from": "implemented",
+          "implementation_ref": "docs/CHARTER.md",
+          "note": "verification recorded in cumulative context",
+          "repair_required": false,
+          "review_classifications": [],
+          "review_ref": null,
+          "review_result": null,
+          "review_source_identity": null,
+          "to": "verified",
+          "verification_ref": "proof/grill-charter-20261025/PROOF.md"
         }
       ],
       "id": "d5-payroll-and-1099-boundary",
       "implementation_ref": "docs/CHARTER.md",
       "question": "How should @dinkuskit/books handle 1099 contractors vs W-2 payroll and Gusto?",
-      "rationale": "Avoids IRC 6672 personal trust-fund liability and Gusto partner-API gates while making Gusto effortless on EmDash and saving 1099-only businesses /mo + /contractor.",
+      "rationale": "Avoids IRC 6672 personal trust-fund liability and Gusto partner-API gates while making Gusto effortless on EmDash and saving 1099-only businesses $35/mo + $6/contractor.",
       "repair_required": false,
       "review_classifications": [],
       "review_history": [
@@ -566,7 +734,7 @@
       "review_source_identity": null,
       "status": "verified",
       "superseded_by": null,
-      "updated_at": "2026-10-25T23:17:54+00:00",
+      "updated_at": "2026-10-26T12:33:35+00:00",
       "verification_ref": "proof/grill-charter-20261025/PROOF.md"
     },
     {
@@ -655,7 +823,7 @@
     }
   ],
   "last_activation": {
-    "at": "2026-10-25T14:22:21+00:00",
+    "at": "2026-10-26T12:33:33+00:00",
     "mechanism": "implicit"
   },
   "last_pause": null,
@@ -666,11 +834,11 @@
     ],
     "reason": "Core ledger and statement reconciliation underpin P&L, Safe-to-Spend, Gusto clearing, and tax reserves\u2014while the decoupled County Sales-Tax Schedule package has zero EmDash lock-in and can also be built immediately as an independent high-impact module.",
     "recommended": "Cycle 2A: Core Double-Entry Ledger, Chart of Accounts & Bank/Multi-Processor Reconciliation Kernel (CSV/OFX + SimpleFIN + Stripe & Authorize.Net clearing)",
-    "recorded_at": "2026-10-25T15:08:37+00:00"
+    "recorded_at": "2026-10-26T12:33:35+00:00"
   },
   "schema_version": "grilltrack/v0.1",
   "status": "active",
   "title": "DinkusKit Books \u2014 Charter & Scope",
   "track_id": "gt-20261025142221-8223a4",
-  "updated_at": "2026-10-25T23:17:54+00:00"
+  "updated_at": "2026-10-26T12:33:35+00:00"
 }
